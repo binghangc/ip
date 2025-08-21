@@ -1,4 +1,7 @@
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Bingy {
     public static void main(String[] args) {
@@ -7,8 +10,27 @@ public class Bingy {
     }
 }
 
+class TaskManager {
+    private static final String line = "____________________________________________________________";
+    private List<String> tasks;
+
+    public TaskManager(int size) {
+        tasks = new ArrayList<>();
+    }
+
+    public void addTask(String task) {
+        tasks.add(task);
+    }
+
+    public List<String> getTasks() {
+        return Collections.unmodifiableList(tasks);
+    }
+
+}
+
 class BingyBot {
     private static final String line = "____________________________________________________________";
+    private static TaskManager taskManager = new TaskManager(100);
     private static final String logo =
             ".-. .-')                .-') _                         \n"
           + "\\  ( OO )              ( OO ) )                        \n"
@@ -44,8 +66,18 @@ class BingyBot {
         if (input.trim().equalsIgnoreCase("bye")) {
             sayGoodbye();
             running = false;
+        } else if (input.trim().equalsIgnoreCase("list")) {
+            System.out.println(line);
+            List<String> tasks = taskManager.getTasks();
+            for (int i = 0; i < tasks.size(); i++) {
+                System.out.println(String.format("%d. %s", i + 1, tasks.get(i)));
+            }
+            System.out.println(line);
         } else {
-            echo(input);
+            taskManager.addTask(input);
+            System.out.println(line);
+            System.out.println("added: " + input);
+            System.out.println(line);
         }
     }
 
