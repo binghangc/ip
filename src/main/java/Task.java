@@ -1,9 +1,17 @@
-public class Task {
-    private boolean isDone;
+public abstract class Task {
     private final String description;
+    private boolean isDone;
 
-    public Task (String description) {
+    public Task(String description) {
         this.description = description;
+        this.isDone = false;
+    }
+
+    public void markDone() {
+        this.isDone = true;
+    }
+
+    public void markUndone() {
         this.isDone = false;
     }
 
@@ -15,16 +23,10 @@ public class Task {
         return (isDone ? "X" : " ");
     }
 
-    public void markDone() {
-        isDone = true;
-    }
-
-    public void markUndone() {
-        isDone = false;
-    }
+    protected abstract String typeTag();
 
     @Override
     public String toString() {
-        return String.format("[%s] %s", this.getStatusIcon(), this.getDescription());
+        return String.format("[%s][%s] %s", typeTag(), getStatusIcon(), getDescription());
     }
 }

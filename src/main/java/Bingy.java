@@ -26,12 +26,30 @@ class TaskManager {
         tasks.get(index).markUndone();
     }
 
-    public void addTask(String task) {
-        tasks.add(new Task(task));
+    public ToDo addToDo(String description) {
+        ToDo task = new ToDo(description);
+        tasks.add(task);
+        return task;
+    }
+
+    public Deadline addDeadline(String description, String deadline) {
+        Deadline task = new Deadline(description, deadline);
+        tasks.add(task);
+        return task;
+    }
+
+    public Events addEvents(String description, String start, String end) {
+        Events task = new Events(description, start, end);
+        tasks.add(task);
+        return task;
     }
 
     public List<Task> getTasks() {
         return Collections.unmodifiableList(tasks);
+    }
+
+    public int getSize() {
+        return this.getTasks().size();
     }
 
 }
@@ -60,6 +78,18 @@ class BingyBot {
             handleInput(input);
         }
         sc.close();
+    }
+
+    private void sendMessage(String message) {
+        System.out.println(line);
+        System.out.println(message);
+        System.out.println(line);
+    }
+
+    private String listStatus() {
+        int size = taskManager.getSize();
+        String taskWord = (size == 1) ? "task" : "tasks";
+        return String.format("Now you have %d %s in the list", size, taskWord);
     }
 
     private void greet() {
@@ -92,6 +122,10 @@ class BingyBot {
             return;
         }
 
+        String[] split = trimmed.split(" ", 2);
+        String action = split[0];
+        String payload = split[1];
+
 
         String[] parts = trimmed.split("\\s+");
         String command = parts[0];
@@ -99,18 +133,14 @@ class BingyBot {
 
         if (command.equalsIgnoreCase("mark") || command.equalsIgnoreCase("unmark")) {
             if (parts.length < 2) {
-                System.out.println(line);
-                System.out.println("What the helly. Give me a task number like \"Mark 2\" or something. Quick");
-                System.out.println(line);
+                sendMessage("What the helly. Give a valid input");
                 return;
             }
             int taskIndex;
             try {
                 taskIndex = Integer.parseInt(parts[1]) - 1; // to 0-based
             } catch (NumberFormatException e) {
-                System.out.println(line);
-                System.out.println(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
-                System.out.println(line);
+                sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
                 return;
             }
             List<Task> tasks = taskManager.getTasks();
@@ -129,14 +159,27 @@ class BingyBot {
                 System.out.println("   " + t);
                 System.out.println(line);
             }
-            return;
+
         }
 
-
-        taskManager.addTask(trimmed);
-        System.out.println(line);
-        System.out.println("added: " + trimmed);
-        System.out.println(line);
+        if (command.equalsIgnoreCase("todo")) {
+            ToDo newTask = taskManager.addToDo(payload.trim());
+            sendMessage(String.format("Added this task:\n  %s\n%s", newTask, listStatus()));
+        } else if (command.equalsIgnoreCase("deadline")) {
+            String[] payloadSplit = payload.split("/by", 2);
+            String description = payloadSplit[0].trim();
+            String deadline = payloadSplit[1].trim();
+            Deadline newTask = taskManager.addDeadline(description, deadline);
+            sendMessage(String.format("Time is tickin'!\n  %s\n%s", newTask, listStatus()));
+        } else if (command.equalsIgnoreCase("event")) {
+            String[] payloadSplit = payload.split("/from", 2);
+            String description = payloadSplit[0].trim();
+            String[] timeSplit = payloadSplit[1].split("/to", 2);
+            String start = timeSplit[0].trim();
+            String end = timeSplit[1].trim();
+            Events newTask = taskManager.addEvents(description, start, end);
+            sendMessage(String.format("Eventing!\n   %s\n%s", newTask, listStatus()));
+        }
     }
 
 
