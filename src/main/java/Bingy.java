@@ -1,4 +1,4 @@
-import java.sql.SQLOutput;
+import java.util.Scanner;
 
 public class Bingy {
     public static void main(String[] args) {
@@ -13,10 +13,17 @@ public class Bingy {
                         + " | |  \\  | ,|  |_.'|  |\\    | (|  | '. (_/ |   /  /\\_  \n"
                         + " | '--'  /(_|  |   |  | \\   |  |  '--'  |  `-./  /.__) \n"
                         + " `------'   `--'   `--'  `--'   `------'     `--'      \n";
+        Scanner res = new Scanner(System.in);
 
         System.out.println(logo);
         System.out.println(line + "\n Boo! I'm Bingy \n");
-        System.out.println(" What can I do for you? \n");
-        System.out.println(line + "\n Bye. Hope to see you again soon! \n" + line);
+        System.out.println(" WHAT caan I doooOoo for yoou? \n");
+        String response = res.nextLine();
+        while (!response.trim().equalsIgnoreCase("bye")) {
+            System.out.println(line + "\n" + response + "\n" + line);
+            response = res.nextLine();
+        }
+        System.out.println(line + "\n bbbbYEE. hope to scareee you again soooooOOon! \n" + line);
+        res.close();
     }
 }
