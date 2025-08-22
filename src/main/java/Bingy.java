@@ -74,8 +74,12 @@ class BingyBot {
         greet();
         Scanner sc = new Scanner(System.in);
         while (running) {
-            String input = sc.nextLine();
-            handleInput(input);
+            try {
+                String input = sc.nextLine();
+                handleInput(input);
+            } catch (Exception e) {
+                sendMessage(e.getMessage());
+            }
         }
         sc.close();
     }
@@ -100,7 +104,7 @@ class BingyBot {
         System.out.println(line);
     }
 
-    private void handleInput(String input) {
+    private void handleInput(String input) throws EmptyTaskException {
         String trimmed = input.trim();
 
 
@@ -124,8 +128,7 @@ class BingyBot {
 
         String[] split = trimmed.split(" ", 2);
         String action = split[0];
-        String payload = split[1];
-
+        String payload = (split.length > 1) ? split[1] : "";
 
         String[] parts = trimmed.split("\\s+");
         String command = parts[0];
@@ -144,6 +147,12 @@ class BingyBot {
                 return;
             }
             List<Task> tasks = taskManager.getTasks();
+            if (taskIndex < 0 || taskIndex >= tasks.size()) {
+                throw new InvalidTaskIndexException(
+                        String.format("Index %d is out of bounds (valid range: 1 to %d)",
+                                taskIndex + 1, tasks.size())
+                );
+            }
 
             Task t = tasks.get(taskIndex);
             if (command.equalsIgnoreCase("mark")) {
@@ -164,21 +173,44 @@ class BingyBot {
 
         if (command.equalsIgnoreCase("todo")) {
             ToDo newTask = taskManager.addToDo(payload.trim());
+            if (payload.trim().isEmpty()) throw new EmptyTaskException("todo");
             sendMessage(String.format("Added this task:\n  %s\n%s", newTask, listStatus()));
+
         } else if (command.equalsIgnoreCase("deadline")) {
             String[] payloadSplit = payload.split("/by", 2);
             String description = payloadSplit[0].trim();
-            String deadline = payloadSplit[1].trim();
+            if (description.trim().isEmpty()) throw new EmptyTaskException("deadline");
+            String deadline = payloadSplit.length > 1 ? payloadSplit[1].trim() : " ";
+            if (deadline.trim().isEmpty()) throw new EmptyDeadlineTime();
             Deadline newTask = taskManager.addDeadline(description, deadline);
             sendMessage(String.format("Time is tickin'!\n  %s\n%s", newTask, listStatus()));
+
         } else if (command.equalsIgnoreCase("event")) {
-            String[] payloadSplit = payload.split("/from", 2);
-            String description = payloadSplit[0].trim();
-            String[] timeSplit = payloadSplit[1].split("/to", 2);
-            String start = timeSplit[0].trim();
-            String end = timeSplit[1].trim();
+            if (payload.isBlank()) throw new EmptyTaskException("event");
+
+            String[] fromSplit = payload.split(" /from ", 2);
+            if (fromSplit.length < 2) {
+                throw new EmptyEventTime();
+            }
+            String description = fromSplit[0].trim();
+
+            if (description.isEmpty()) throw new EmptyTaskException("event");
+
+            String[] toSplit = fromSplit[1].split(" /to ", 2);
+            if (toSplit.length < 2) {
+                throw new EmptyEventTime();
+            }
+            String start = toSplit[0].trim();
+            String end = toSplit[1].trim();
+            if (start.isEmpty() || end.isEmpty()) {
+                throw new EmptyEventTime();
+            }
+
             Events newTask = taskManager.addEvents(description, start, end);
             sendMessage(String.format("Eventing!\n   %s\n%s", newTask, listStatus()));
+
+        } else {
+            throw new InvalidCommandException(command);
         }
     }
 
