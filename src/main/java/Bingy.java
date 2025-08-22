@@ -26,6 +26,10 @@ class TaskManager {
         tasks.get(index).markUndone();
     }
 
+    public void deleteTask(int index) {
+        tasks.remove(index);
+    }
+
     public ToDo addToDo(String description) {
         ToDo task = new ToDo(description);
         tasks.add(task);
@@ -134,7 +138,8 @@ class BingyBot {
         String command = parts[0];
 
 
-        if (command.equalsIgnoreCase("mark") || command.equalsIgnoreCase("unmark")) {
+        if (command.equalsIgnoreCase("mark") || command.equalsIgnoreCase("unmark") ||
+            command.equalsIgnoreCase("delete")) {
             if (parts.length < 2) {
                 sendMessage("What the helly. Give a valid input");
                 return;
@@ -161,13 +166,20 @@ class BingyBot {
                 System.out.println(" Hopefully you did the task properly... Marked it for you");
                 System.out.println("   " + t);
                 System.out.println(line);
-            } else {
+                return;
+            } else if (command.equalsIgnoreCase("unmark")){
                 taskManager.markUndone(taskIndex);
                 System.out.println(line);
                 System.out.println(" Ha! I knew you couldn't do it. Unmarked it! Welcome");
                 System.out.println("   " + t);
                 System.out.println(line);
+                return;
+            } else if (command.equalsIgnoreCase("delete")) {
+                taskManager.deleteTask(taskIndex);
+                sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+                return;
             }
+
 
         }
 
