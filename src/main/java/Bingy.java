@@ -2,20 +2,15 @@ import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.IOException;
 
-public class Bingy {
-    public static void main(String[] args) {
-        BingyBot bot = new BingyBot();
-        bot.run();
-    }
-}
+
 
 class TaskManager {
     private static final String line = "____________________________________________________________";
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     public TaskManager(int size) {
-        tasks = new ArrayList<>();
     }
 
     public void markDone(int index) {
@@ -56,11 +51,18 @@ class TaskManager {
         return this.getTasks().size();
     }
 
+    public void addAll(List<Task> items) {
+        if (items != null) {
+            tasks.addAll(items);
+        }
+    }
+
 }
 
 class BingyBot {
     private static final String line = "____________________________________________________________";
     private static TaskManager taskManager = new TaskManager(100);
+    private static final Storage storage = new Storage("tasks.txt");
     private static final String logo =
             ".-. .-')                .-') _                         \n"
           + "\\  ( OO )              ( OO ) )                        \n"
@@ -76,6 +78,12 @@ class BingyBot {
 
     public void run() {
         greet();
+        try {
+            ArrayList<Task> loaded = storage.load();
+            taskManager.addAll(loaded);
+        } catch (IOException e) {
+            sendMessage("Starting fresh (no saved tasks found).");
+        }
         Scanner sc = new Scanner(System.in);
         while (running) {
             try {
@@ -111,118 +119,97 @@ class BingyBot {
     private void handleInput(String input) throws EmptyTaskException {
         String trimmed = input.trim();
 
+        ParsedCommand cmd = ParsedCommand.parseUserCommand(input);
 
-        if (trimmed.equalsIgnoreCase("bye")) {
-            sayGoodbye();
-            running = false;
-            return;
-        }
-
-
-        if (trimmed.equalsIgnoreCase("list")) {
-            System.out.println(line);
-            System.out.println("Here's the list of chores you will NOT complete MUAHAHAH");
-            List<Task> tasks = taskManager.getTasks();
-            for (int i = 0; i < tasks.size(); i++) {
-                System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
-            }
-            System.out.println(line);
-            return;
-        }
-
-        String[] split = trimmed.split(" ", 2);
-        String action = split[0];
-        String payload = (split.length > 1) ? split[1] : "";
-
-        String[] parts = trimmed.split("\\s+");
-        String command = parts[0];
-
-
-        if (command.equalsIgnoreCase("mark") || command.equalsIgnoreCase("unmark") ||
-            command.equalsIgnoreCase("delete")) {
-            if (parts.length < 2) {
-                sendMessage("What the helly. Give a valid input");
+        switch (cmd.type) {
+            case BYE:
+                sayGoodbye();
+                running = false;
                 return;
-            }
-            int taskIndex;
-            try {
-                taskIndex = Integer.parseInt(parts[1]) - 1; // to 0-based
-            } catch (NumberFormatException e) {
-                sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
-                return;
-            }
-            List<Task> tasks = taskManager.getTasks();
-            if (taskIndex < 0 || taskIndex >= tasks.size()) {
-                throw new InvalidTaskIndexException(
-                        String.format("Index %d is out of bounds (valid range: 1 to %d)",
-                                taskIndex + 1, tasks.size())
-                );
-            }
 
-            Task t = tasks.get(taskIndex);
-            if (command.equalsIgnoreCase("mark")) {
-                taskManager.markDone(taskIndex);
+            case LIST:
                 System.out.println(line);
-                System.out.println(" Hopefully you did the task properly... Marked it for you");
-                System.out.println("   " + t);
+                System.out.println("Here's the list of chores you will NOT complete MUAHAHAH");
+                List<Task> tasks = taskManager.getTasks();
+                for (int i = 0; i < tasks.size(); i++) {
+                    System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
+                }
                 System.out.println(line);
                 return;
-            } else if (command.equalsIgnoreCase("unmark")){
-                taskManager.markUndone(taskIndex);
-                System.out.println(line);
-                System.out.println(" Ha! I knew you couldn't do it. Unmarked it! Welcome");
-                System.out.println("   " + t);
-                System.out.println(line);
+
+            case MARK:
+            case UNMARK:
+            case DELETE:
+                if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
+                    sendMessage("What the helly. Give a valid input");
+                    return;
+                }
+                int taskIndex;
+                try {
+                    taskIndex = Integer.parseInt(cmd.arg1) - 1; // to 0-based
+                } catch (NumberFormatException e) {
+                    sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
+                    return;
+                }
+                List<Task> taskList = taskManager.getTasks();
+                if (taskIndex < 0 || taskIndex >= taskList.size()) {
+                    throw new InvalidTaskIndexException(
+                            String.format("Index %d is out of bounds (valid range: 1 to %d)",
+                                    taskIndex + 1, taskList.size())
+                    );
+                }
+
+                Task t = taskList.get(taskIndex);
+                if (cmd.type == ParsedCommand.Type.MARK) {
+                    taskManager.markDone(taskIndex);
+                    System.out.println(line);
+                    System.out.println(" Hopefully you did the task properly... Marked it for you");
+                    System.out.println("   " + t);
+                    System.out.println(line);
+                    persist();
+                    return;
+                } else if (cmd.type == ParsedCommand.Type.UNMARK){
+                    taskManager.markUndone(taskIndex);
+                    System.out.println(line);
+                    System.out.println(" Ha! I knew you couldn't do it. Unmarked it! Welcome");
+                    System.out.println("   " + t);
+                    System.out.println(line);
+                    persist();
+                    return;
+                } else if (cmd.type == ParsedCommand.Type.DELETE) {
+                    taskManager.deleteTask(taskIndex);
+                    sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+                    persist();
+                    return;
+                }
+                break;
+
+            case TODO:
+                if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("todo");
+                ToDo newToDo = taskManager.addToDo(cmd.arg1.trim());
+                sendMessage(String.format("Added this task:\n  %s\n%s", newToDo, listStatus()));
+                persist();
                 return;
-            } else if (command.equalsIgnoreCase("delete")) {
-                taskManager.deleteTask(taskIndex);
-                sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+
+            case DEADLINE:
+                if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("deadline");
+                if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyDeadlineTime();
+                Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.arg2.trim());
+                sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
+                persist();
                 return;
-            }
 
+            case EVENT:
+                if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("event");
+                if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyEventTime();
+                if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) throw new EmptyEventTime();
+                Events newEvent = taskManager.addEvents(cmd.arg1.trim(), cmd.arg2.trim(), cmd.arg3.trim());
+                sendMessage(String.format("Eventing!\n   %s\n%s", newEvent, listStatus()));
+                persist();
+                return;
 
-        }
-
-        if (command.equalsIgnoreCase("todo")) {
-            ToDo newTask = taskManager.addToDo(payload.trim());
-            if (payload.trim().isEmpty()) throw new EmptyTaskException("todo");
-            sendMessage(String.format("Added this task:\n  %s\n%s", newTask, listStatus()));
-
-        } else if (command.equalsIgnoreCase("deadline")) {
-            String[] payloadSplit = payload.split("/by", 2);
-            String description = payloadSplit[0].trim();
-            if (description.trim().isEmpty()) throw new EmptyTaskException("deadline");
-            String deadline = payloadSplit.length > 1 ? payloadSplit[1].trim() : " ";
-            if (deadline.trim().isEmpty()) throw new EmptyDeadlineTime();
-            Deadline newTask = taskManager.addDeadline(description, deadline);
-            sendMessage(String.format("Time is tickin'!\n  %s\n%s", newTask, listStatus()));
-
-        } else if (command.equalsIgnoreCase("event")) {
-            if (payload.isBlank()) throw new EmptyTaskException("event");
-
-            String[] fromSplit = payload.split(" /from ", 2);
-            if (fromSplit.length < 2) {
-                throw new EmptyEventTime();
-            }
-            String description = fromSplit[0].trim();
-
-            if (description.isEmpty()) throw new EmptyTaskException("event");
-
-            String[] toSplit = fromSplit[1].split(" /to ", 2);
-            if (toSplit.length < 2) {
-                throw new EmptyEventTime();
-            }
-            String start = toSplit[0].trim();
-            String end = toSplit[1].trim();
-            if (start.isEmpty() || end.isEmpty()) {
-                throw new EmptyEventTime();
-            }
-
-            Events newTask = taskManager.addEvents(description, start, end);
-            sendMessage(String.format("Eventing!\n   %s\n%s", newTask, listStatus()));
-
-        } else {
-            throw new InvalidCommandException(command);
+            default:
+                throw new InvalidCommandException(cmd.type.toString());
         }
     }
 
@@ -235,5 +222,124 @@ class BingyBot {
         System.out.println(line + "\n bbbbYEE. hope to scareee you again soooooOOon! \n" + line);
     }
 
+    private void persist() {
+        try {
+            storage.save(new ArrayList<>(taskManager.getTasks()));
+        } catch (IOException e) {
+            sendMessage("Failed to save tasks: " + e.getMessage());
+        }
+    }
+    public static void main(String[] args) {
+        BingyBot bot = new BingyBot();
+        bot.run();
+    }
 
+    static class ParsedCommand {
+        enum Type {
+            LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN
+        }
+
+        final Type type;
+        final String arg1;
+        final String arg2;
+        final String arg3;
+
+        ParsedCommand(Type type) {
+            this(type, null, null, null);
+        }
+
+        ParsedCommand(Type type, String arg1) {
+            this(type, arg1, null, null);
+        }
+
+        ParsedCommand(Type type, String arg1, String arg2) {
+            this(type, arg1, arg2, null);
+        }
+
+        ParsedCommand(Type type, String arg1, String arg2, String arg3) {
+            this.type = type;
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+            this.arg3 = arg3;
+        }
+
+        static ParsedCommand parseUserCommand(String input) {
+            if (input == null) {
+                return new ParsedCommand(Type.UNKNOWN);
+            }
+            String trimmed = input.trim();
+            if (trimmed.isEmpty()) {
+                return new ParsedCommand(Type.UNKNOWN);
+            }
+
+            String lower = trimmed.toLowerCase();
+
+            if (lower.equals("list")) {
+                return new ParsedCommand(Type.LIST);
+            }
+
+            if (lower.equals("bye")) {
+                return new ParsedCommand(Type.BYE);
+            }
+
+            String[] parts = trimmed.split("\\s+", 2);
+            String command = parts[0].toLowerCase();
+            String rest = parts.length > 1 ? parts[1].trim() : "";
+
+            switch (command) {
+                case "mark":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.MARK, rest);
+                case "unmark":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.UNMARK, rest);
+                case "delete":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.DELETE, rest);
+                case "todo":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.TODO, rest);
+                case "deadline":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    String[] deadlineParts = rest.split("/by", 2);
+                    String description = deadlineParts[0].trim();
+                    String by = deadlineParts.length > 1 ? deadlineParts[1].trim() : "";
+                    if (description.isEmpty() || by.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.DEADLINE, description, by);
+                case "event":
+                    if (rest.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    String[] fromSplit = rest.split(" /from ", 2);
+                    if (fromSplit.length < 2) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    String desc = fromSplit[0].trim();
+                    String[] toSplit = fromSplit[1].split(" /to ", 2);
+                    if (toSplit.length < 2) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    String start = toSplit[0].trim();
+                    String end = toSplit[1].trim();
+                    if (desc.isEmpty() || start.isEmpty() || end.isEmpty()) {
+                        return new ParsedCommand(Type.UNKNOWN);
+                    }
+                    return new ParsedCommand(Type.EVENT, desc, start, end);
+                default:
+                    return new ParsedCommand(Type.UNKNOWN);
+            }
+        }
+    }
 }
