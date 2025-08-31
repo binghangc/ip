@@ -1,6 +1,6 @@
 [T][ ] help
 [E][ ] welcome dinner (from: 6pm, to: 10pm)
-[T][ ] prepare for dinner
-[T][ ] what
 [D][ ] shower (by: 2024-01-01)
 [D][X] complete coding task (by: 2025-08-31)
+[T][ ] what
+[T][ ] shit

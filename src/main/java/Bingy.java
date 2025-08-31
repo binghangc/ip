@@ -7,8 +7,6 @@ import java.io.IOException;
 import util.Parser;
 import util.Parser.ParsedCommand;
 
-
-
 class TaskManager {
     private List<Task> tasks = new ArrayList<>();
 
@@ -62,29 +60,19 @@ class TaskManager {
 }
 
 class BingyBot {
-    private static final String line = "____________________________________________________________";
     private static TaskManager taskManager = new TaskManager(100);
     private static final Storage storage = new Storage("tasks.txt");
-    private static final String logo =
-            ".-. .-')                .-') _                         \n"
-          + "\\  ( OO )              ( OO ) )                        \n"
-          + " ;-----.\\   ,-.-') ,--./ ,--,'  ,----.      ,--.   ,--.\n"
-          + " | .-.  |   |  |OO)|   \\ |  |\\ '  .-./-')    \\  `.'  / \n"
-          + " | '-' /_)  |  |  \\|    \\|  | )|  |_( O- ) .-')     /  \n"
-          + " | .-. `.   |  |(_/|  .     |/ |  | .--, \\\\(OO  \\   /   \n"
-          + " | |  \\  | ,|  |_.'|  |\\    | (|  | '. (_/ |   /  /\\_  \n"
-          + " | '--'  /(_|  |   |  | \\   |  |  '--'  |  `-./  /.__) \n"
-          + " `------'   `--'   `--'  `--'   `------'     `--'      \n";
+    private final Ui ui = new Ui();
     private boolean running = true;
 
 
     public void run() {
-        greet();
+        ui.greet();
         try {
             ArrayList<Task> loaded = storage.load();
             taskManager.addAll(loaded);
         } catch (IOException e) {
-            sendMessage("Starting fresh (no saved tasks found).");
+            ui.sendMessage("Starting fresh (no saved tasks found).");
         }
         Scanner sc = new Scanner(System.in);
         while (running) {
@@ -92,17 +80,12 @@ class BingyBot {
                 String input = sc.nextLine();
                 handleInput(input);
             } catch (Exception e) {
-                sendMessage(e.getMessage());
+                ui.sendMessage(e.getMessage());
             }
         }
         sc.close();
     }
 
-    private void sendMessage(String message) {
-        System.out.println(line);
-        System.out.println(message);
-        System.out.println(line);
-    }
 
     private String listStatus() {
         int size = taskManager.getSize();
@@ -110,13 +93,6 @@ class BingyBot {
         return String.format("Now you have %d %s in the list", size, taskWord);
     }
 
-    private void greet() {
-        System.out.println(logo);
-        System.out.println(line);
-        System.out.println(" Boo! I'm Bingy");
-        System.out.println(" WHAT caan't I doooOoo for yoou?");
-        System.out.println(line);
-    }
 
     private void handleInput(String input) throws EmptyTaskException {
         String trimmed = input.trim();
@@ -130,27 +106,21 @@ class BingyBot {
                 return;
 
             case LIST:
-                System.out.println(line);
-                System.out.println("Here's the list of chores you will NOT complete MUAHAHAH");
-                List<Task> tasks = taskManager.getTasks();
-                for (int i = 0; i < tasks.size(); i++) {
-                    System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
-                }
-                System.out.println(line);
+                ui.showTasks(taskManager.getTasks());
                 return;
 
             case MARK:
             case UNMARK:
             case DELETE:
                 if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
-                    sendMessage("What the helly. Give a valid input");
+                    ui.sendMessage("What the helly. Give a valid input");
                     return;
                 }
                 int taskIndex;
                 try {
                     taskIndex = Integer.parseInt(cmd.arg1) - 1; // to 0-based
                 } catch (NumberFormatException e) {
-                    sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
+                    ui.sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
                     return;
                 }
                 List<Task> taskList = taskManager.getTasks();
@@ -164,23 +134,17 @@ class BingyBot {
                 Task t = taskList.get(taskIndex);
                 if (cmd.type == ParsedCommand.Type.MARK) {
                     taskManager.markDone(taskIndex);
-                    System.out.println(line);
-                    System.out.println(" Hopefully you did the task properly... Marked it for you");
-                    System.out.println("   " + t);
-                    System.out.println(line);
+                    ui.sendMessage(" Hopefully you did the task properly... Marked it for you\n   " + t);
                     persist();
                     return;
                 } else if (cmd.type == ParsedCommand.Type.UNMARK){
                     taskManager.markUndone(taskIndex);
-                    System.out.println(line);
-                    System.out.println(" Ha! I knew you couldn't do it. Unmarked it! Welcome");
-                    System.out.println("   " + t);
-                    System.out.println(line);
+                    ui.sendMessage(" Ha! I knew you couldn't do it. Unmarked it! Welcome\n   " + t);
                     persist();
                     return;
                 } else if (cmd.type == ParsedCommand.Type.DELETE) {
                     taskManager.deleteTask(taskIndex);
-                    sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+                    ui.sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
                     persist();
                     return;
                 }
@@ -189,7 +153,7 @@ class BingyBot {
             case TODO:
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("todo");
                 ToDo newToDo = taskManager.addToDo(cmd.arg1.trim());
-                sendMessage(String.format("Added this task:\n  %s\n%s", newToDo, listStatus()));
+                ui.sendMessage(String.format("Added this task:\n  %s\n%s", newToDo, listStatus()));
                 persist();
                 return;
 
@@ -197,7 +161,7 @@ class BingyBot {
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("deadline");
                 if (cmd.deadline == null) throw new EmptyDeadlineTime();
                 Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.deadline);
-                sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
+                ui.sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
                 persist();
                 return;
 
@@ -206,7 +170,7 @@ class BingyBot {
                 if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyEventTime();
                 if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) throw new EmptyEventTime();
                 Events newEvent = taskManager.addEvents(cmd.arg1.trim(), cmd.arg2.trim(), cmd.arg3.trim());
-                sendMessage(String.format("Eventing!\n   %s\n%s", newEvent, listStatus()));
+                ui.sendMessage(String.format("Eventing!\n   %s\n%s", newEvent, listStatus()));
                 persist();
                 return;
 
@@ -216,19 +180,15 @@ class BingyBot {
     }
 
 
-    private void echo(String input) {
-        System.out.println(line + "\n " + input + "\n" + line);
-    }
-
     private void sayGoodbye() {
-        System.out.println(line + "\n bbbbYEE. hope to scareee you again soooooOOon! \n" + line);
+        ui.sayGoodbye();
     }
 
     private void persist() {
         try {
             storage.save(new ArrayList<>(taskManager.getTasks()));
         } catch (IOException e) {
-            sendMessage("Failed to save tasks: " + e.getMessage());
+            ui.sendMessage("Failed to save tasks: " + e.getMessage());
         }
     }
     public static void main(String[] args) {
