@@ -1,6 +1,9 @@
 package bingy.util;
 
 import bingy.tasks.Task;
+import bingy.tasks.ToDo;
+import bingy.tasks.Deadline;
+import bingy.tasks.Events;
 
 import java.util.List;
 
@@ -46,5 +49,23 @@ public class Ui {
             System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
         }
         System.out.println(LINE);
+    }
+
+    public void showAdded(ToDo task, TaskManager tasks) {
+        String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
+        String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
+        sendMessage(String.format("Added this task:\n  %s\n%s", task, status));
+    }
+
+    public void showDeadline(Deadline task, TaskManager tasks) {
+        String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
+        String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
+        sendMessage(String.format("Time is tickin'!\n  %s\n%s", task, status));
+    }
+
+    public void showEvent(Events task, TaskManager tasks) {
+        String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
+        String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
+        sendMessage(String.format("Eventing!\n   %s\n%s", task, status));
     }
 }

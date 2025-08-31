@@ -1,10 +1,8 @@
 package bingy;
 
-import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.io.IOException;
 
 import bingy.exceptions.*;
@@ -16,60 +14,9 @@ import bingy.util.Parser;
 import bingy.util.Parser.ParsedCommand;
 import bingy.util.Storage;
 import bingy.util.Ui;
+import bingy.util.TaskManager;
 
-class TaskManager {
-    private List<Task> tasks = new ArrayList<>();
-
-    public TaskManager(int size) {
-    }
-
-    public void markDone(int index) {
-        tasks.get(index).markDone();
-    }
-
-    public void markUndone(int index) {
-        tasks.get(index).markUndone();
-    }
-
-    public void deleteTask(int index) {
-        tasks.remove(index);
-    }
-
-    public ToDo addToDo(String description) {
-        ToDo task = new ToDo(description);
-        tasks.add(task);
-        return task;
-    }
-
-    public Deadline addDeadline(String description, LocalDate deadline) {
-        Deadline task = new Deadline(description, deadline);
-        tasks.add(task);
-        return task;
-    }
-
-    public Events addEvents(String description, String start, String end) {
-        Events task = new Events(description, start, end);
-        tasks.add(task);
-        return task;
-    }
-
-    public List<Task> getTasks() {
-        return Collections.unmodifiableList(tasks);
-    }
-
-    public int getSize() {
-        return this.getTasks().size();
-    }
-
-    public void addAll(List<Task> items) {
-        if (items != null) {
-            tasks.addAll(items);
-        }
-    }
-
-}
-
-class BingyBot {
+public class Bingy {
     private static TaskManager taskManager = new TaskManager(100);
     private static final Storage storage = new Storage("tasks.txt");
     private final Ui ui = new Ui();
@@ -94,13 +41,6 @@ class BingyBot {
             }
         }
         sc.close();
-    }
-
-
-    private String listStatus() {
-        int size = taskManager.getSize();
-        String taskWord = (size == 1) ? "task" : "tasks";
-        return String.format("Now you have %d %s in the list", size, taskWord);
     }
 
 
@@ -170,7 +110,7 @@ class BingyBot {
             case TODO:
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("todo");
                 ToDo newToDo = taskManager.addToDo(cmd.arg1.trim());
-                ui.sendMessage(String.format("Added this task:\n  %s\n%s", newToDo, listStatus()));
+                ui.showAdded(newToDo, taskManager);
                 persist();
                 return;
 
@@ -178,7 +118,7 @@ class BingyBot {
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("deadline");
                 if (cmd.deadline == null) throw new EmptyDeadlineTimeException();
                 Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.deadline);
-                ui.sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
+                ui.showDeadline(newDeadline, taskManager);
                 persist();
                 return;
 
@@ -187,7 +127,7 @@ class BingyBot {
                 if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyEventTimeException();
                 if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) throw new EmptyEventTimeException();
                 Events newEvent = taskManager.addEvents(cmd.arg1.trim(), cmd.arg2.trim(), cmd.arg3.trim());
-                ui.sendMessage(String.format("Eventing!\n   %s\n%s", newEvent, listStatus()));
+                ui.showEvent(newEvent, taskManager);
                 persist();
                 return;
 
@@ -209,7 +149,7 @@ class BingyBot {
         }
     }
     public static void main(String[] args) {
-        BingyBot bot = new BingyBot();
+        Bingy bot = new Bingy();
         bot.run();
     }
 }
