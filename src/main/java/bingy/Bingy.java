@@ -54,10 +54,10 @@ public class Bingy {
 
 
     /**
-     * Handles user input and executes corresponding command
+     * Handles user input and executes corresponding command.
      *
-     * @param input raw String user input when user presses enter
-     * @throws EmptyTaskException if the command is missing a required task description
+     * @param input raw String user input when user presses enter.
+     * @throws EmptyTaskException if the command is missing a required task description.
      *
      */
     private void handleInput(String input) throws EmptyTaskException {

@@ -43,7 +43,7 @@ public class Ui {
     /**
      * Prints a message wrapped by horizontal separator lines for consistent formatting.
      *
-     * @param message the text to display to the user
+     * @param message the text to display to the user.
      */
     public void sendMessage(String message) {
         System.out.println(LINE);
@@ -62,7 +62,7 @@ public class Ui {
     /**
      * Displays all tasks in the given list, numbered from 1.
      *
-     * @param tasks the list of {@link bingy.tasks.Task} to display
+     * @param tasks the list of {@link bingy.tasks.Task} to display.
      */
     public void showTasks(List<Task> tasks) {
         System.out.println(LINE);
@@ -77,8 +77,8 @@ public class Ui {
      * Displays a confirmation after adding a {@link bingy.tasks.ToDo},
      * along with the updated task count from the {@link bingy.util.TaskManager}.
      *
-     * @param task  the {@link bingy.tasks.ToDo} that was added
-     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count
+     * @param task  the {@link bingy.tasks.ToDo} that was added.
+     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
     public void showAdded(ToDo task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
@@ -90,8 +90,8 @@ public class Ui {
      * Displays a confirmation after adding a {@link bingy.tasks.Deadline},
      * along with the updated task count from the {@link bingy.util.TaskManager}.
      *
-     * @param task  the {@link bingy.tasks.Deadline} that was added
-     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count
+     * @param task  the {@link bingy.tasks.Deadline} that was added.
+     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
     public void showDeadline(Deadline task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
@@ -103,8 +103,8 @@ public class Ui {
      * Displays a confirmation after adding an {@link bingy.tasks.Events} task,
      * along with the updated task count from the {@link bingy.util.TaskManager}.
      *
-     * @param task  the {@link bingy.tasks.Events} task that was added
-     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count
+     * @param task  the {@link bingy.tasks.Events} task that was added.
+     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
     public void showEvent(Events task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";

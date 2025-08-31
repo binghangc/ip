@@ -28,7 +28,7 @@ public class Storage {
     /**
      * Create a new instance that takes in a file name and reads and writes from the data directory.
      *
-     * @param fileName the name of the file used for read and write
+     * @param fileName the name of the file used for read and write.
      */
     public Storage(String fileName) {
         Path folder = Paths.get("data");
@@ -50,8 +50,8 @@ public class Storage {
      * {@code toStorageString()} (ISO-8601 date) while other tasks use
      * their {@code toString()} representation.
      *
-     * @param list the tasks to persist; order is preserved
-     * @throws IOException if an I/O error occurs while writing
+     * @param list the tasks to persist; order is preserved.
+     * @throws IOException if an I/O error occurs while writing.
      */
     public void save(ArrayList<Task> list) throws IOException {
         FileWriter fw = new FileWriter(file);
@@ -76,8 +76,8 @@ public class Storage {
      * Each line is parsed back into a concrete task using
      * {@link bingy.util.Parser#parseStorageLine(String)}. Missing files are treated as empty.
      *
-     * @return a list containing all tasks found in the file (may be empty)
-     * @throws IOException if an I/O error occurs while reading
+     * @return a list containing all tasks found in the file (may be empty).
+     * @throws IOException if an I/O error occurs while reading.
      */
     public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();

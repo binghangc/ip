@@ -23,7 +23,7 @@ public class TaskManager {
     /**
      * Marks the task at the given index as complete.
      *
-     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based)
+     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based).
      */
     public void markDone(int index) {
         tasks.get(index).markDone();
@@ -32,7 +32,7 @@ public class TaskManager {
     /**
      * Marks the task at the given index as incomplete
      *
-     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based)
+     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based).
      */
     public void markUndone(int index) {
         tasks.get(index).markUndone();
@@ -41,7 +41,7 @@ public class TaskManager {
     /**
      * Deletes the task at the given index from the list
      *
-     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based)
+     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based).
      */
     public void deleteTask(int index) {
         tasks.remove(index);
@@ -50,8 +50,8 @@ public class TaskManager {
     /**
      * Creates and adds a new {@link bingy.tasks.ToDo} to the task list.
      *
-     * @param description the description of the to-do task
-     * @return the {@link bingy.tasks.ToDo} that was created and added
+     * @param description the description of the to-do task.
+     * @return the {@link bingy.tasks.ToDo} that was created and added.
      */
     public ToDo addToDo(String description) {
         ToDo task = new ToDo(description);
@@ -62,9 +62,9 @@ public class TaskManager {
     /**
      * Creates and adds a new {@link bingy.tasks.Deadline} to the task list.
      *
-     * @param description the description of the deadline task
-     * @param deadline the {@link java.time.LocalDate} by which the task is due
-     * @return the {@link bingy.tasks.Deadline} that was created and added
+     * @param description the description of the deadline task.
+     * @param deadline the {@link java.time.LocalDate} by which the task is due.
+     * @return the {@link bingy.tasks.Deadline} that was created and added.
      */
     public Deadline addDeadline(String description, LocalDate deadline) {
         Deadline task = new Deadline(description, deadline);
@@ -75,10 +75,10 @@ public class TaskManager {
     /**
      * Creates and adds a new {@link bingy.tasks.Events} to the task list.
      *
-     * @param description the description of the event task
-     * @param start the start time of the event
-     * @param end the end time of the event
-     * @return the {@link bingy.tasks.Events} that was created and added
+     * @param description the description of the event task.
+     * @param start the start time of the event.
+     * @param end the end time of the event.
+     * @return the {@link bingy.tasks.Events} that was created and added.
      */
     public Events addEvents(String description, String start, String end) {
         Events task = new Events(description, start, end);
@@ -89,7 +89,7 @@ public class TaskManager {
     /**
      * Returns an unmodifiable view of the current tasks.
      *
-     * @return an unmodifiable {@link java.util.List} of {@link bingy.tasks.Task}
+     * @return an unmodifiable {@link java.util.List} of {@link bingy.tasks.Task}.
      */
     public List<Task> getTasks() {
         return Collections.unmodifiableList(tasks);
@@ -98,7 +98,7 @@ public class TaskManager {
     /**
      * Returns the number of tasks currently in the list.
      *
-     * @return the total number of tasks
+     * @return the total number of tasks.
      */
     public int getSize() {
         return tasks.size();
@@ -107,7 +107,7 @@ public class TaskManager {
     /**
      * Adds all tasks from the given list into the task manager.
      *
-     * @param items the list of {@link bingy.tasks.Task} to add; ignored if null
+     * @param items the list of {@link bingy.tasks.Task} to add; ignored if null.
      */
     public void addAll(List<Task> items) {
         if (items != null) {

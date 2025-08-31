@@ -14,9 +14,9 @@ public class Events extends Task {
     /**
      * Creates a new {@link Events} task with the given description, start, and end times.
      *
-     * @param description the description of the event
-     * @param start the start time of the event
-     * @param end the end time of the event
+     * @param description the description of the event.
+     * @param start the start time of the event.
+     * @param end the end time of the event.
      */
     public Events(String description, String start, String end) {
         super(description);

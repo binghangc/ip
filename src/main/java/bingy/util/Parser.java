@@ -257,8 +257,8 @@ public class Parser {
      * Parses a single line from the storage file back into a {@link ParsedCommand}
      * representing a task (TODO/DEADLINE/EVENT) with its completion state.
      *
-     * @param line a serialized task line (e.g., "[D][X] finish (by: 2025-12-31)")
-     * @return a {@link ParsedCommand} suitable for reconstruction, or UNKNOWN if malformed
+     * @param line a serialized task line (e.g., "[D][X] finish (by: 2025-12-31)").
+     * @return a {@link ParsedCommand} suitable for reconstruction, or UNKNOWN if malformed.
      */
     public static ParsedCommand parseStorageLine(String line) {
         if (line == null || line.length() < 7) {

@@ -17,8 +17,8 @@ public class Deadline extends Task {
     /**
      * Creates a new {@link Deadline} task with the specified description and due date.
      *
-     * @param description the description of the deadline task
-     * @param deadline the {@link java.time.LocalDate} by which the task is due
+     * @param description the description of the deadline task.
+     * @param deadline the {@link java.time.LocalDate} by which the task is due.
      */
     public Deadline(String description, LocalDate deadline) {
         super(description);
@@ -43,7 +43,7 @@ public class Deadline extends Task {
      * consistency when reloading tasks from persistent storage.
      * </p>
      *
-     * @return the storage-ready string representation of this deadline
+     * @return the storage-ready string representation of this deadline.
      */
     public String toStorageString() {
         return String.format("[%s][%s] %s (by: %s)", typeTag(),
