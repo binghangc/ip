@@ -1,4 +1,4 @@
-package util;
+package bingy.util;
 
 import java.time.LocalDate;
 
@@ -102,7 +102,7 @@ public class Parser {
                 );
             case "todo":
                 if (parts.length < 2 || parts[1].trim().isEmpty()) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
+                    return new ParsedCommand(ParsedCommand.Type.TODO, (String) null);
                 }
                 return new ParsedCommand(ParsedCommand.Type.TODO, parts[1].trim());
             case "deadline":
@@ -124,21 +124,36 @@ public class Parser {
                 LocalDate byDate = LocalDate.parse(deadlineParts[1].trim());
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, byDate);
             case "event":
+                // Gracefully return EVENT with nulls so BingyBot can throw specific errors
                 if (parts.length < 2) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
+                    return new ParsedCommand(ParsedCommand.Type.EVENT, (String) null, (String) null, (String) null);
                 }
-                String descAndTimes = parts[1];
+                String descAndTimes = parts[1].trim();
+                if (descAndTimes.isEmpty()) {
+                    return new ParsedCommand(ParsedCommand.Type.EVENT, (String) null, (String) null, (String) null);
+                }
                 int fromIndex = descAndTimes.indexOf(" /from ");
-                int toIndex = descAndTimes.indexOf(" /to ");
-                if (fromIndex == -1 || toIndex == -1 || fromIndex >= toIndex) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
+                String description = null;
+                String start = null;
+                String end = null;
+                if (fromIndex == -1) {
+                    // No /from provided; treat everything as description only
+                    description = descAndTimes.trim();
+                } else {
+                    description = descAndTimes.substring(0, fromIndex).trim();
+                    int toIndex = descAndTimes.indexOf(" /to ", fromIndex + 7);
+                    if (toIndex == -1) {
+                        // Have /from but no /to yet → missing end time
+                        start = descAndTimes.substring(fromIndex + 7).trim();
+                    } else {
+                        start = descAndTimes.substring(fromIndex + 7, toIndex).trim();
+                        end = descAndTimes.substring(toIndex + 5).trim();
+                    }
                 }
-                String description = descAndTimes.substring(0, fromIndex).trim();
-                String start = descAndTimes.substring(fromIndex + 7, toIndex).trim();
-                String end = descAndTimes.substring(toIndex + 5).trim();
-                if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
-                }
+                // Normalize empty strings to null for cleaner checks downstream
+                if (description != null && description.isEmpty()) description = null;
+                if (start != null && start.isEmpty()) start = null;
+                if (end != null && end.isEmpty()) end = null;
                 return new ParsedCommand(ParsedCommand.Type.EVENT, description, start, end);
             default:
                 return new ParsedCommand(ParsedCommand.Type.UNKNOWN);

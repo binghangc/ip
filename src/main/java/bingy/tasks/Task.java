@@ -1,3 +1,5 @@
+package bingy.tasks;
+
 public abstract class Task {
     private final String description;
     private boolean isDone;

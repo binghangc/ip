@@ -1,11 +1,21 @@
+package bingy;
+
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.IOException;
-import util.Parser;
-import util.Parser.ParsedCommand;
+
+import bingy.exceptions.*;
+import bingy.tasks.Deadline;
+import bingy.tasks.Events;
+import bingy.tasks.Task;
+import bingy.tasks.ToDo;
+import bingy.util.Parser;
+import bingy.util.Parser.ParsedCommand;
+import bingy.util.Storage;
+import bingy.util.Ui;
 
 class TaskManager {
     private List<Task> tasks = new ArrayList<>();
@@ -99,6 +109,14 @@ class BingyBot {
 
         ParsedCommand cmd = Parser.parseUserCommand(input);
 
+        if (cmd.type == ParsedCommand.Type.UNKNOWN) {
+            // Preserve the user's command word for a clearer error message
+            String cmdWord = (cmd.arg1 != null && !cmd.arg1.isBlank())
+                    ? cmd.arg1
+                    : (trimmed.isEmpty() ? "" : trimmed.split("\\s+", 2)[0]);
+            throw new InvalidCommandException(cmdWord);
+        }
+
         switch (cmd.type) {
             case BYE:
                 sayGoodbye();
@@ -113,8 +131,7 @@ class BingyBot {
             case UNMARK:
             case DELETE:
                 if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
-                    ui.sendMessage("What the helly. Give a valid input");
-                    return;
+                    throw new InvalidTaskIndexException("Please provide a task number after the command. Example: mark 2");
                 }
                 int taskIndex;
                 try {
@@ -159,7 +176,7 @@ class BingyBot {
 
             case DEADLINE:
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("deadline");
-                if (cmd.deadline == null) throw new EmptyDeadlineTime();
+                if (cmd.deadline == null) throw new EmptyDeadlineTimeException();
                 Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.deadline);
                 ui.sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
                 persist();
@@ -167,8 +184,8 @@ class BingyBot {
 
             case EVENT:
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("event");
-                if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyEventTime();
-                if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) throw new EmptyEventTime();
+                if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyEventTimeException();
+                if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) throw new EmptyEventTimeException();
                 Events newEvent = taskManager.addEvents(cmd.arg1.trim(), cmd.arg2.trim(), cmd.arg3.trim());
                 ui.sendMessage(String.format("Eventing!\n   %s\n%s", newEvent, listStatus()));
                 persist();

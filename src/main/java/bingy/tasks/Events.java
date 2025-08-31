@@ -1,3 +1,5 @@
+package bingy.tasks;
+
 public class Events extends Task {
     private final String start;
     private final String end;

@@ -1,3 +1,7 @@
+package bingy.util;
+
+import bingy.tasks.Task;
+
 import java.util.List;
 
 public class Ui {
