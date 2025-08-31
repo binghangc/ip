@@ -20,7 +20,7 @@ public class Parser {
          * All supported command kinds recognized by the parser.
          */
         public enum Type {
-            LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN
+            LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN, FIND
         }
 
         /**
@@ -185,6 +185,11 @@ public class Parser {
                 return new ParsedCommand(ParsedCommand.Type.TODO, (String) null);
             }
             return new ParsedCommand(ParsedCommand.Type.TODO, parts[1].trim());
+        case "find":
+            if (parts.length < 2 || parts[1].trim().isEmpty()) {
+                return new ParsedCommand(ParsedCommand.Type.FIND, (String) null);
+            }
+            return new ParsedCommand(ParsedCommand.Type.FIND, parts[1].trim());
         case "deadline":
             if (parts.length < 2) {
                 // no payload after "deadline"
@@ -192,12 +197,10 @@ public class Parser {
             }
             String[] deadlineParts = parts[1].split(" /by ", 2);
             String descPart = deadlineParts[0].trim();
-
             if (descPart.isEmpty()) {
                 // missing description
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, null, (LocalDate) null);
             }
-
             if (deadlineParts.length < 2 || deadlineParts[1].trim().isEmpty()) {
                 // description present, but missing or empty /by portion
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, (LocalDate) null);
@@ -206,11 +209,11 @@ public class Parser {
             LocalDate byDate = LocalDate.parse(deadlineParts[1].trim());
             return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, byDate);
         case "event":
+            // Gracefully return EVENT with nulls so BingyBot can throw specific errors
             if (parts.length < 2) {
                 return new ParsedCommand(ParsedCommand.Type.EVENT, (String) null, (String) null, (String) null);
             }
             String descAndTimes = parts[1].trim();
-
             if (descAndTimes.isEmpty()) {
                 return new ParsedCommand(ParsedCommand.Type.EVENT, (String) null, (String) null, (String) null);
             }
@@ -218,14 +221,12 @@ public class Parser {
             String description = null;
             String start = null;
             String end = null;
-
             if (fromIndex == -1) {
                 // No /from provided; treat everything as description only
                 description = descAndTimes.trim();
             } else {
                 description = descAndTimes.substring(0, fromIndex).trim();
                 int toIndex = descAndTimes.indexOf(" /to ", fromIndex + 7);
-
                 if (toIndex == -1) {
                     // Have /from but no /to yet → missing end time
                     start = descAndTimes.substring(fromIndex + 7).trim();
@@ -235,31 +236,15 @@ public class Parser {
                 }
             }
             // Normalize empty strings to null for cleaner checks downstream
-            if (description != null && description.isEmpty()) {
-                description = null;
-            }
-
-            if (start != null && start.isEmpty()) {
-                start = null;
-            }
-
-            if (end != null && end.isEmpty()) {
-                end = null;
-            }
-
+            if (description != null && description.isEmpty()) description = null;
+            if (start != null && start.isEmpty()) start = null;
+            if (end != null && end.isEmpty()) end = null;
             return new ParsedCommand(ParsedCommand.Type.EVENT, description, start, end);
         default:
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
         }
     }
 
-    /**
-     * Parses a single line from the storage file back into a {@link ParsedCommand}
-     * representing a task (TODO/DEADLINE/EVENT) with its completion state.
-     *
-     * @param line a serialized task line (e.g., "[D][X] finish (by: 2025-12-31)").
-     * @return a {@link ParsedCommand} suitable for reconstruction, or UNKNOWN if malformed.
-     */
     public static ParsedCommand parseStorageLine(String line) {
         if (line == null || line.length() < 7) {
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
@@ -281,11 +266,9 @@ public class Parser {
         }
         case 'D': { // [D][ ] description (by: when)
             int byIdx = rest.lastIndexOf("(by:");
-
             if (byIdx == -1) {
                 return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
             }
-
             String desc = rest.substring(0, byIdx).trim();
             String whenPart = rest.substring(byIdx).trim();
 

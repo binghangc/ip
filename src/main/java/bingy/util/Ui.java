@@ -60,6 +60,21 @@ public class Ui {
 
 
     /**
+     * Displays list of matched tasks and enumerates matching tasks.
+     *
+     * @param tasks list of matching {@link bingy.tasks.Task}.
+     */
+    public void showMatches(List<Task> tasks) {
+        System.out.println(LINE);
+        System.out.println("Here are the matches:");
+
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
+        }
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays all tasks in the given list, numbered from 1.
      *
      * @param tasks the list of {@link bingy.tasks.Task} to display.

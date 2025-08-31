@@ -84,6 +84,13 @@ public class Bingy {
             ui.showTasks(taskManager.getTasks());
             return;
 
+        case FIND:
+            if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
+                throw new EmptyKeywordException();
+            }
+            ui.showMatches(taskManager.find(cmd.arg1));
+            return;
+
         case MARK:
         case UNMARK:
         case DELETE:
@@ -94,7 +101,7 @@ public class Bingy {
             try {
                 taskIndex = Integer.parseInt(cmd.arg1) - 1; // to 0-based
             } catch (NumberFormatException e) {
-                ui.sendMessage("Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
+                ui.sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
                 return;
             }
             List<Task> taskList = taskManager.getTasks();
@@ -108,18 +115,17 @@ public class Bingy {
             Task t = taskList.get(taskIndex);
             if (cmd.type == ParsedCommand.Type.MARK) {
                 taskManager.markDone(taskIndex);
-                ui.sendMessage("Hopefully you did the task properly... Marked it for you\n   " + t);
+                ui.sendMessage(" Hopefully you did the task properly... Marked it for you\n   " + t);
                 persist();
                 return;
             } else if (cmd.type == ParsedCommand.Type.UNMARK) {
                 taskManager.markUndone(taskIndex);
-                ui.sendMessage("Ha! I knew you couldn't do it. Unmarked it! Welcome\n   " + t);
+                ui.sendMessage(" Ha! I knew you couldn't do it. Unmarked it! Welcome\n   " + t);
                 persist();
                 return;
             } else if (cmd.type == ParsedCommand.Type.DELETE) {
                 taskManager.deleteTask(taskIndex);
-                ui.sendMessage(
-                        String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+                ui.sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
                 persist();
                 return;
             }

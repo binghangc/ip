@@ -76,7 +76,7 @@ public class Storage {
      * Each line is parsed back into a concrete task using
      * {@link bingy.util.Parser#parseStorageLine(String)}. Missing files are treated as empty.
      *
-     * @return a list containing all tasks found in the file (may be empty).
+     * @return a list containing all tasks found in the file (maybe empty).
      * @throws IOException if an I/O error occurs while reading.
      */
     public ArrayList<Task> load() throws IOException {

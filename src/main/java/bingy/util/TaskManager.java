@@ -38,11 +38,6 @@ public class TaskManager {
         tasks.get(index).markUndone();
     }
 
-    /**
-     * Deletes the task at the given index from the list
-     *
-     * @param index the position of the {@link bingy.tasks.Task} in the list (0-based).
-     */
     public void deleteTask(int index) {
         tasks.remove(index);
     }
@@ -102,6 +97,24 @@ public class TaskManager {
      */
     public int getSize() {
         return tasks.size();
+    }
+
+    /**
+     * Searches for tasks whose description contains the given keyword.
+     * The search is case-insensitive.
+     *
+     * @param keyword the string to search for in task descriptions.
+     * @return a list of {@link bingy.tasks.Task} whose descriptions contain the keyword.
+     */
+    public List<Task> find(String keyword) {
+        String needle = keyword.toLowerCase();
+        List<Task> matches = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(needle)) {
+                matches.add(t);
+            }
+        }
+        return matches;
     }
 
     /**
