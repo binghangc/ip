@@ -58,6 +58,24 @@ public class TaskManager {
         return tasks.size();
     }
 
+    /**
+     * Searches for tasks whose description contains the given keyword.
+     * The search is case-insensitive.
+     *
+     * @param keyword the string to search for in task descriptions.
+     * @return a list of {@link bingy.tasks.Task} whose descriptions contain the keyword.
+     */
+    public List<Task> find(String keyword) {
+        String needle = keyword.toLowerCase();
+        List<Task> matches = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(needle)) {
+                matches.add(t);
+            }
+        }
+        return matches;
+    }
+
     public void addAll(List<Task> items) {
         if (items != null) {
             tasks.addAll(items);

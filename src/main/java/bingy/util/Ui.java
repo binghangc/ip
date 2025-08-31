@@ -42,6 +42,21 @@ public class Ui {
         System.out.println(LINE + "\n " + input + "\n" + LINE);
     }
 
+    /**
+     * Displays list of matched tasks and enumerates matching tasks.
+     *
+     * @param tasks list of matching {@link bingy.tasks.Task}.
+     */
+    public void showMatches(List<Task> tasks) {
+        System.out.println(LINE);
+        System.out.println("Here are the matches:");
+
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
+        }
+        System.out.println(LINE);
+    }
+
     public void showTasks(List<Task> tasks) {
         System.out.println(LINE);
         System.out.println("Here's the list of chores you will NOT complete MUAHAHAH");
