@@ -74,17 +74,17 @@ public class Storage {
                 Parser.ParsedCommand cmd = Parser.parseStorageLine(line);
                 Task task;
                 switch (cmd.type) {
-                    case TODO:
-                        task = new ToDo(cmd.arg1);
-                        break;
-                    case DEADLINE:
-                        task = new Deadline(cmd.arg1, cmd.deadline);
-                        break;
-                    case EVENT:
-                        task = new Events(cmd.arg1, cmd.arg2, cmd.arg3);
-                        break;
-                    default:
-                        continue;
+                case TODO:
+                    task = new ToDo(cmd.arg1);
+                    break;
+                case DEADLINE:
+                    task = new Deadline(cmd.arg1, cmd.deadline);
+                    break;
+                case EVENT:
+                    task = new Events(cmd.arg1, cmd.arg2, cmd.arg3);
+                    break;
+                default:
+                    continue;
                 }
                 if (cmd.isDone) {
                     task.markDone();
@@ -95,10 +95,6 @@ public class Storage {
 
         return tasks;
     }
-
-
-
-
 
 
 }
