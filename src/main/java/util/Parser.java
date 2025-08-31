@@ -1,3 +1,5 @@
+package util;
+
 public class Parser {
     public static class ParsedCommand {
         public enum Type {

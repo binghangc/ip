@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.IOException;
+import util.Parser;
+import util.Parser.ParsedCommand;
 
 
 
@@ -119,7 +121,7 @@ class BingyBot {
     private void handleInput(String input) throws EmptyTaskException {
         String trimmed = input.trim();
 
-        ParsedCommand cmd = ParsedCommand.parseUserCommand(input);
+        ParsedCommand cmd = Parser.parseUserCommand(input);
 
         switch (cmd.type) {
             case BYE:
@@ -232,114 +234,5 @@ class BingyBot {
     public static void main(String[] args) {
         BingyBot bot = new BingyBot();
         bot.run();
-    }
-
-    static class ParsedCommand {
-        enum Type {
-            LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN
-        }
-
-        final Type type;
-        final String arg1;
-        final String arg2;
-        final String arg3;
-
-        ParsedCommand(Type type) {
-            this(type, null, null, null);
-        }
-
-        ParsedCommand(Type type, String arg1) {
-            this(type, arg1, null, null);
-        }
-
-        ParsedCommand(Type type, String arg1, String arg2) {
-            this(type, arg1, arg2, null);
-        }
-
-        ParsedCommand(Type type, String arg1, String arg2, String arg3) {
-            this.type = type;
-            this.arg1 = arg1;
-            this.arg2 = arg2;
-            this.arg3 = arg3;
-        }
-
-        static ParsedCommand parseUserCommand(String input) {
-            if (input == null) {
-                return new ParsedCommand(Type.UNKNOWN);
-            }
-            String trimmed = input.trim();
-            if (trimmed.isEmpty()) {
-                return new ParsedCommand(Type.UNKNOWN);
-            }
-
-            String lower = trimmed.toLowerCase();
-
-            if (lower.equals("list")) {
-                return new ParsedCommand(Type.LIST);
-            }
-
-            if (lower.equals("bye")) {
-                return new ParsedCommand(Type.BYE);
-            }
-
-            String[] parts = trimmed.split("\\s+", 2);
-            String command = parts[0].toLowerCase();
-            String rest = parts.length > 1 ? parts[1].trim() : "";
-
-            switch (command) {
-                case "mark":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.MARK, rest);
-                case "unmark":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.UNMARK, rest);
-                case "delete":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.DELETE, rest);
-                case "todo":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.TODO, rest);
-                case "deadline":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    String[] deadlineParts = rest.split("/by", 2);
-                    String description = deadlineParts[0].trim();
-                    String by = deadlineParts.length > 1 ? deadlineParts[1].trim() : "";
-                    if (description.isEmpty() || by.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.DEADLINE, description, by);
-                case "event":
-                    if (rest.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    String[] fromSplit = rest.split(" /from ", 2);
-                    if (fromSplit.length < 2) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    String desc = fromSplit[0].trim();
-                    String[] toSplit = fromSplit[1].split(" /to ", 2);
-                    if (toSplit.length < 2) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    String start = toSplit[0].trim();
-                    String end = toSplit[1].trim();
-                    if (desc.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                        return new ParsedCommand(Type.UNKNOWN);
-                    }
-                    return new ParsedCommand(Type.EVENT, desc, start, end);
-                default:
-                    return new ParsedCommand(Type.UNKNOWN);
-            }
-        }
     }
 }
