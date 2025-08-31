@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import util.Parser.ParsedCommand;
 
 
 class TaskManager {
-    private static final String line = "____________________________________________________________";
     private List<Task> tasks = new ArrayList<>();
 
     public TaskManager(int size) {
@@ -33,7 +33,7 @@ class TaskManager {
         return task;
     }
 
-    public Deadline addDeadline(String description, String deadline) {
+    public Deadline addDeadline(String description, LocalDate deadline) {
         Deadline task = new Deadline(description, deadline);
         tasks.add(task);
         return task;
@@ -195,8 +195,8 @@ class BingyBot {
 
             case DEADLINE:
                 if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("deadline");
-                if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) throw new EmptyDeadlineTime();
-                Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.arg2.trim());
+                if (cmd.deadline == null) throw new EmptyDeadlineTime();
+                Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.deadline);
                 sendMessage(String.format("Time is tickin'!\n  %s\n%s", newDeadline, listStatus()));
                 persist();
                 return;

@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import util.Parser;
-import util.Parser.ParsedCommand;
 
 
 
@@ -43,7 +42,12 @@ public class Storage {
         FileWriter fw = new FileWriter(file);
         try {
             for (Task t : list) {
-                fw.write(t.toString());
+                if (t instanceof Deadline) {
+                    fw.write(((Deadline) t).toStorageString());
+                } else {
+                    fw.write(t.toString());
+
+                }
                 fw.write(System.lineSeparator());
             }
         } finally {
@@ -63,19 +67,19 @@ public class Storage {
             String line;
             while ((line = br.readLine()) != null) {
                 Parser.ParsedCommand cmd = Parser.parseStorageLine(line);
-                Task task = null;
+                Task task;
                 switch (cmd.type) {
                     case TODO:
                         task = new ToDo(cmd.arg1);
                         break;
                     case DEADLINE:
-                        task = new Deadline(cmd.arg1, cmd.arg2);
+                        task = new Deadline(cmd.arg1, cmd.deadline);
                         break;
                     case EVENT:
                         task = new Events(cmd.arg1, cmd.arg2, cmd.arg3);
                         break;
                     default:
-                        continue; // skip unknown/malformed lines
+                        continue;
                 }
                 if (cmd.isDone) {
                     task.markDone();

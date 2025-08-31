@@ -1,5 +1,8 @@
 package util;
 
+import java.time.LocalDate;
+
+
 public class Parser {
     public static class ParsedCommand {
         public enum Type {
@@ -10,6 +13,7 @@ public class Parser {
         public String arg1;
         public String arg2;
         public String arg3;
+        public LocalDate deadline;
         public boolean isDone;
 
         public ParsedCommand(Type type) {
@@ -21,10 +25,10 @@ public class Parser {
             this.arg1 = arg1;
         }
 
-        public ParsedCommand(Type type, String arg1, String arg2) {
+        public ParsedCommand(Type type, String arg1, LocalDate deadline) {
             this.type = type;
             this.arg1 = arg1;
-            this.arg2 = arg2;
+            this.deadline = deadline;
         }
 
         public ParsedCommand(Type type, String arg1, String arg2, String arg3) {
@@ -45,11 +49,11 @@ public class Parser {
             this.arg1 = arg1;
         }
 
-        public ParsedCommand(Type type, boolean isDone, String arg1, String arg2) {
+        public ParsedCommand(Type type, boolean isDone, String arg1, LocalDate deadline) {
             this.type = type;
             this.isDone = isDone;
             this.arg1 = arg1;
-            this.arg2 = arg2;
+            this.deadline = deadline;
         }
 
         public ParsedCommand(Type type, boolean isDone, String arg1, String arg2, String arg3) {
@@ -103,13 +107,22 @@ public class Parser {
                 return new ParsedCommand(ParsedCommand.Type.TODO, parts[1].trim());
             case "deadline":
                 if (parts.length < 2) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
+                    // no payload after "deadline"
+                    return new ParsedCommand(ParsedCommand.Type.DEADLINE, null, (LocalDate) null);
                 }
                 String[] deadlineParts = parts[1].split(" /by ", 2);
-                if (deadlineParts.length < 2 || deadlineParts[0].trim().isEmpty() || deadlineParts[1].trim().isEmpty()) {
-                    return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
+                String descPart = deadlineParts[0].trim();
+                if (descPart.isEmpty()) {
+                    // missing description
+                    return new ParsedCommand(ParsedCommand.Type.DEADLINE, null, (LocalDate) null);
                 }
-                return new ParsedCommand(ParsedCommand.Type.DEADLINE, deadlineParts[0].trim(), deadlineParts[1].trim());
+                if (deadlineParts.length < 2 || deadlineParts[1].trim().isEmpty()) {
+                    // description present, but missing or empty /by portion
+                    return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, (LocalDate) null);
+                }
+                // description and /by present; try ISO parse (yyyy-MM-dd)
+                LocalDate byDate = LocalDate.parse(deadlineParts[1].trim());
+                return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, byDate);
             case "event":
                 if (parts.length < 2) {
                     return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
@@ -170,7 +183,7 @@ public class Parser {
                 if (desc.isEmpty() || by.isEmpty()) {
                     return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
                 }
-                return new ParsedCommand(ParsedCommand.Type.DEADLINE, isDone, desc, by);
+                return new ParsedCommand(ParsedCommand.Type.DEADLINE, isDone, desc, LocalDate.parse(by));
             }
             case 'E': {
                 int fromIdx = rest.lastIndexOf("(from:");
