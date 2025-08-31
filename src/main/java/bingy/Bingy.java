@@ -16,6 +16,10 @@ import bingy.util.Storage;
 import bingy.util.Ui;
 import bingy.util.TaskManager;
 
+/**
+ * Represents the main entry point for the Bingy chatbot application.
+ * It coordinates user input, parsing, task management, and UI.
+ */
 public class Bingy {
     private static TaskManager taskManager = new TaskManager(100);
     private static final Storage storage = new Storage("tasks.txt");
@@ -23,6 +27,11 @@ public class Bingy {
     private boolean running = true;
 
 
+    /**
+     * Starts the main program loop.
+     * Loads tasks from storage, greets the user, and continuously reads input
+     * until the user exits.
+     */
     public void run() {
         ui.greet();
         try {
@@ -44,6 +53,13 @@ public class Bingy {
     }
 
 
+    /**
+     * Handles user input and executes corresponding command
+     *
+     * @param input raw String user input when user presses enter
+     * @throws EmptyTaskException if the command is missing a required task description
+     *
+     */
     private void handleInput(String input) throws EmptyTaskException {
         String trimmed = input.trim();
 
@@ -136,11 +152,17 @@ public class Bingy {
         }
     }
 
-
+    /**
+     * Displays goodbye message to user after "bye" input
+     */
     private void sayGoodbye() {
         ui.sayGoodbye();
     }
 
+    /**
+     * Saves the current list of tasks to persistent storage.
+     * If saving fails, displays an error message to the user.
+     */
     private void persist() {
         try {
             storage.save(new ArrayList<>(taskManager.getTasks()));
@@ -148,6 +170,7 @@ public class Bingy {
             ui.sendMessage("Failed to save tasks: " + e.getMessage());
         }
     }
+
     public static void main(String[] args) {
         Bingy bot = new Bingy();
         bot.run();

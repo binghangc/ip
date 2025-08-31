@@ -2,13 +2,32 @@ package bingy.util;
 
 import java.time.LocalDate;
 
-
+/**
+ * Provides methods to parse both user commands and stored task lines.
+ * <p>
+ * Used at runtime to convert raw user input into a structured {@link Parser.ParsedCommand}
+ * for execution, and also to reconstruct tasks from their serialized form in storage.
+ */
 public class Parser {
+    /**
+     * A structured representation of a parsed command.
+     * <p>
+     * Instances are produced by {@link #parseUserCommand(String)} for runtime commands
+     * and by {@link #parseStorageLine(String)} for persisted task lines.
+     */
     public static class ParsedCommand {
+        /**
+         * All supported command kinds recognized by the parser.
+         */
         public enum Type {
             LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN
         }
 
+        /**
+         * Parsed command metadata and arguments. Fields may be {@code null} when
+         * intentionally left unspecified so that the caller (e.g., Bingy) can
+         * surface a more specific error message instead of a generic UNKNOWN.
+         */
         public Type type;
         public String arg1;
         public String arg2;
@@ -16,21 +35,43 @@ public class Parser {
         public LocalDate deadline;
         public boolean isDone;
 
+        /**
+         * Creates a command with only a {@link Type} and no arguments.
+         * Useful for simple commands like LIST or BYE.
+         */
         public ParsedCommand(Type type) {
             this.type = type;
         }
 
+        /**
+         * Creates a command with a primary string argument (e.g., index or description).
+         *
+         * @param arg1 primary argument (may be {@code null} when missing)
+         */
         public ParsedCommand(Type type, String arg1) {
             this.type = type;
             this.arg1 = arg1;
         }
 
+        /**
+         * Creates a DEADLINE command with description and due date.
+         *
+         * @param arg1 description text (may be {@code null})
+         * @param deadline ISO-8601 date for the deadline (may be {@code null})
+         */
         public ParsedCommand(Type type, String arg1, LocalDate deadline) {
             this.type = type;
             this.arg1 = arg1;
             this.deadline = deadline;
         }
 
+        /**
+         * Creates a command with up to three string arguments (e.g., EVENT: desc, start, end).
+         *
+         * @param arg1 first argument (e.g., description)
+         * @param arg2 second argument (e.g., start time)
+         * @param arg3 third argument (e.g., end time)
+         */
         public ParsedCommand(Type type, String arg1, String arg2, String arg3) {
             this.type = type;
             this.arg1 = arg1;
@@ -38,17 +79,35 @@ public class Parser {
             this.arg3 = arg3;
         }
 
+        /**
+         * Creates a command that carries a completion flag (used when parsing storage lines).
+         *
+         * @param isDone whether the item was marked completed
+         */
         public ParsedCommand(Type type, boolean isDone) {
             this.type = type;
             this.isDone = isDone;
         }
 
+        /**
+         * Creates a command with a completion flag and a primary argument.
+         *
+         * @param isDone completion status parsed from storage
+         * @param arg1 primary argument value
+         */
         public ParsedCommand(Type type, boolean isDone, String arg1) {
             this.type = type;
             this.isDone = isDone;
             this.arg1 = arg1;
         }
 
+        /**
+         * Creates a DEADLINE command from storage with completion flag and due date.
+         *
+         * @param isDone completion status parsed from storage
+         * @param arg1 description value
+         * @param deadline due date value
+         */
         public ParsedCommand(Type type, boolean isDone, String arg1, LocalDate deadline) {
             this.type = type;
             this.isDone = isDone;
@@ -56,6 +115,14 @@ public class Parser {
             this.deadline = deadline;
         }
 
+        /**
+         * Creates an EVENT command from storage with completion flag.
+         *
+         * @param isDone completion status parsed from storage
+         * @param arg1 description
+         * @param arg2 start time
+         * @param arg3 end time
+         */
         public ParsedCommand(Type type, boolean isDone, String arg1, String arg2, String arg3) {
             this.type = type;
             this.isDone = isDone;
@@ -65,6 +132,17 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a raw user input line into a {@link ParsedCommand}.
+     * <p>
+     * The parser avoids throwing user-facing exceptions; instead, it returns specific
+     * command types with {@code null} fields when arguments are missing so the caller
+     * can provide contextual error messages. Unknown commands are returned as
+     * {@code Type.UNKNOWN}.
+     *
+     * @param input the raw user-typed line
+     * @return a structured {@link ParsedCommand} describing the intent and arguments
+     */
     public static ParsedCommand parseUserCommand(String input) {
         if (input == null) {
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
@@ -160,6 +238,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a single line from the storage file back into a {@link ParsedCommand}
+     * representing a task (TODO/DEADLINE/EVENT) with its completion state.
+     *
+     * @param line a serialized task line (e.g., "[D][X] finish (by: 2025-12-31)")
+     * @return a {@link ParsedCommand} suitable for reconstruction, or UNKNOWN if malformed
+     */
     public static ParsedCommand parseStorageLine(String line) {
         if (line == null || line.length() < 7) {
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
