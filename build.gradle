@@ -28,11 +28,11 @@ test {
 }
 
 application {
-    mainClass.set("bingy.BingyBot")
+    mainClass.set("bingy.Bingy")
 }
 
 shadowJar {
-    archiveBaseName.set("bingybot")
+    archiveBaseName.set("bingy")
     archiveClassifier = null
 }
 
