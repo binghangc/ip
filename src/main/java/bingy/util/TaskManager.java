@@ -1,14 +1,15 @@
 package bingy.util;
 
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
-import bingy.tasks.Deadline;
-import bingy.tasks.Events;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import bingy.tasks.Deadline;
+import bingy.tasks.Events;
+import bingy.tasks.Task;
+import bingy.tasks.ToDo;
+
 
 /**
  * TaskManager encapsulates the list of tasks and provides operations to mutate it.

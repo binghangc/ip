@@ -1,11 +1,12 @@
 package bingy.util;
 
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
+import java.util.List;
+
 import bingy.tasks.Deadline;
 import bingy.tasks.Events;
+import bingy.tasks.Task;
+import bingy.tasks.ToDo;
 
-import java.util.List;
 
 /**
  * Handles all user interface interactions for the Bingy application.

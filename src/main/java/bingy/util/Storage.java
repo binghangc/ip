@@ -1,14 +1,14 @@
 package bingy.util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
 import java.io.BufferedReader;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
+import java.util.ArrayList;
 
 import bingy.tasks.Deadline;
 import bingy.tasks.Events;
@@ -92,20 +92,20 @@ public class Storage {
             while ((line = br.readLine()) != null) {
                 Parser.ParsedCommand cmd = Parser.parseStorageLine(line);
                 Task task;
-                switch (cmd.type) {
+                switch (cmd.getType()) {
                 case TODO:
-                    task = new ToDo(cmd.arg1);
+                    task = new ToDo(cmd.getArg1());
                     break;
                 case DEADLINE:
-                    task = new Deadline(cmd.arg1, cmd.deadline);
+                    task = new Deadline(cmd.getArg1(), cmd.getDeadline());
                     break;
                 case EVENT:
-                    task = new Events(cmd.arg1, cmd.arg2, cmd.arg3);
+                    task = new Events(cmd.getArg1(), cmd.getArg2(), cmd.getArg3());
                     break;
                 default:
                     continue;
                 }
-                if (cmd.isDone) {
+                if (cmd.isDone()) {
                     task.markDone();
                 }
                 tasks.add(task);

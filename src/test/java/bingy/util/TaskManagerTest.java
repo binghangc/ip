@@ -1,16 +1,16 @@
 package bingy.util;
 
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
-import bingy.tasks.Deadline;
-import bingy.tasks.Events;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import org.junit.jupiter.api.Test;
+
+import bingy.tasks.Deadline;
+import bingy.tasks.Events;
+import bingy.tasks.ToDo;
 
 public class TaskManagerTest {
 

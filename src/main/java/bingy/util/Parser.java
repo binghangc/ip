@@ -28,12 +28,13 @@ public class Parser {
          * intentionally left unspecified so that the caller (e.g., Bingy) can
          * surface a more specific error message instead of a generic UNKNOWN.
          */
-        public Type type;
-        public String arg1;
-        public String arg2;
-        public String arg3;
-        public LocalDate deadline;
-        public boolean isDone;
+        private Type type;
+        private String arg1;
+        private String arg2;
+        private String arg3;
+        private LocalDate deadline;
+        private boolean isDone;
+
 
         /**
          * Creates a command with only a {@link Type} and no arguments.
@@ -130,6 +131,30 @@ public class Parser {
             this.arg2 = arg2;
             this.arg3 = arg3;
         }
+
+        public Type getType() {
+            return type;
+        }
+
+        public String getArg1() {
+            return arg1;
+        }
+
+        public String getArg2() {
+            return arg2;
+        }
+
+        public String getArg3() {
+            return arg3;
+        }
+
+        public LocalDate getDeadline() {
+            return deadline;
+        }
+
+        public boolean isDone() {
+            return isDone;
+        }
     }
 
     /**
@@ -175,9 +200,9 @@ public class Parser {
             }
             String indexStr = parts[1].trim();
             return new ParsedCommand(
-                    command.equals("mark") ? ParsedCommand.Type.MARK :
-                            command.equals("unmark") ? ParsedCommand.Type.UNMARK :
-                                    ParsedCommand.Type.DELETE,
+                    command.equals("mark") ? ParsedCommand.Type.MARK
+                            : command.equals("unmark") ? ParsedCommand.Type.UNMARK
+                                                       : ParsedCommand.Type.DELETE,
                     indexStr
             );
         case "todo":
@@ -236,15 +261,29 @@ public class Parser {
                 }
             }
             // Normalize empty strings to null for cleaner checks downstream
-            if (description != null && description.isEmpty()) description = null;
-            if (start != null && start.isEmpty()) start = null;
-            if (end != null && end.isEmpty()) end = null;
+            if (description != null && description.isEmpty()) {
+                description = null;
+            }
+
+            if (start != null && start.isEmpty()) {
+                start = null;
+            }
+
+            if (end != null && end.isEmpty()) {
+                end = null;
+            }
             return new ParsedCommand(ParsedCommand.Type.EVENT, description, start, end);
         default:
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
         }
     }
 
+    /**
+     * Parses raw storage line into a {@link ParsedCommand}
+     *
+     * @param line the raw storage input
+     * @return a structured {@link ParsedCommand} encapsulating command and arguments
+     */
     public static ParsedCommand parseStorageLine(String line) {
         if (line == null || line.length() < 7) {
             return new ParsedCommand(ParsedCommand.Type.UNKNOWN);

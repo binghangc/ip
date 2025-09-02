@@ -1,13 +1,15 @@
 package bingy;
 
-import bingy.tasks.ToDo;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+import bingy.tasks.ToDo;
 
 public class BingyTest {
 
     @Test
-    void todo_toString_showsTypeAndDescription_initiallyUndone() {
+    void todoToString_showsTypeAndDescription_initiallyUndone() {
         ToDo t = new ToDo("buy milk");
         String s = t.toString();
         assertTrue(s.startsWith("[T]"), "ToDo should start with [T]");

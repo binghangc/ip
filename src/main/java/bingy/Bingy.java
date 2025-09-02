@@ -1,11 +1,16 @@
 package bingy;
 
-import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-import bingy.exceptions.*;
+import bingy.exceptions.EmptyDeadlineTimeException;
+import bingy.exceptions.EmptyEventTimeException;
+import bingy.exceptions.EmptyKeywordException;
+import bingy.exceptions.EmptyTaskException;
+import bingy.exceptions.InvalidCommandException;
+import bingy.exceptions.InvalidTaskIndexException;
 import bingy.tasks.Deadline;
 import bingy.tasks.Events;
 import bingy.tasks.Task;
@@ -13,8 +18,8 @@ import bingy.tasks.ToDo;
 import bingy.util.Parser;
 import bingy.util.Parser.ParsedCommand;
 import bingy.util.Storage;
-import bingy.util.Ui;
 import bingy.util.TaskManager;
+import bingy.util.Ui;
 
 /**
  * Represents the main entry point for the Bingy chatbot application.
@@ -65,16 +70,16 @@ public class Bingy {
 
         ParsedCommand cmd = Parser.parseUserCommand(input);
 
-        if (cmd.type == ParsedCommand.Type.UNKNOWN) {
+        if (cmd.getType() == ParsedCommand.Type.UNKNOWN) {
             // Preserve the user's command word for a clearer error message
-            String cmdWord = (cmd.arg1 != null && !cmd.arg1.isBlank())
-                    ? cmd.arg1
+            String cmdWord = (cmd.getArg1() != null && !cmd.getArg1().isBlank())
+                    ? cmd.getArg1()
                     : (trimmed.isEmpty() ? "" : trimmed.split("\\s+", 2)[0]);
             throw new InvalidCommandException(cmdWord);
         }
 
 
-        switch (cmd.type) {
+        switch (cmd.getType()) {
         case BYE:
             sayGoodbye();
             running = false;
@@ -85,21 +90,21 @@ public class Bingy {
             return;
 
         case FIND:
-            if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
+            if (cmd.getArg1() == null || cmd.getArg1().isEmpty()) {
                 throw new EmptyKeywordException();
             }
-            ui.showMatches(taskManager.find(cmd.arg1));
+            ui.showMatches(taskManager.find(cmd.getArg1()));
             return;
 
         case MARK:
         case UNMARK:
         case DELETE:
-            if (cmd.arg1 == null || cmd.arg1.isEmpty()) {
+            if (cmd.getArg1() == null || cmd.getArg1().isEmpty()) {
                 throw new InvalidTaskIndexException("Please provide a task number after the command. Example: mark 2");
             }
             int taskIndex;
             try {
-                taskIndex = Integer.parseInt(cmd.arg1) - 1; // to 0-based
+                taskIndex = Integer.parseInt(cmd.getArg1()) - 1; // to 0-based
             } catch (NumberFormatException e) {
                 ui.sendMessage(" Give me a task number. Numbers are characters like 1 or 2. Hope that helps!");
                 return;
@@ -113,60 +118,63 @@ public class Bingy {
             }
 
             Task t = taskList.get(taskIndex);
-            if (cmd.type == ParsedCommand.Type.MARK) {
+            if (cmd.getType() == ParsedCommand.Type.MARK) {
                 taskManager.markDone(taskIndex);
                 ui.sendMessage(" Hopefully you did the task properly... Marked it for you\n   " + t);
                 persist();
                 return;
-            } else if (cmd.type == ParsedCommand.Type.UNMARK) {
+            } else if (cmd.getType() == ParsedCommand.Type.UNMARK) {
                 taskManager.markUndone(taskIndex);
                 ui.sendMessage(" Ha! I knew you couldn't do it. Unmarked it! Welcome\n   " + t);
                 persist();
                 return;
-            } else if (cmd.type == ParsedCommand.Type.DELETE) {
+            } else if (cmd.getType() == ParsedCommand.Type.DELETE) {
                 taskManager.deleteTask(taskIndex);
-                ui.sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s", t));
+                ui.sendMessage(String.format("Removing tasks on your list doesn't make it go away. Removed:\n    %s",
+                        t));
                 persist();
                 return;
             }
             break;
 
         case TODO:
-            if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) throw new EmptyTaskException("todo");
-            ToDo newToDo = taskManager.addToDo(cmd.arg1.trim());
+            if (cmd.getArg1() == null || cmd.getArg1().trim().isEmpty()) {
+                throw new EmptyTaskException("todo");
+            }
+            ToDo newToDo = taskManager.addToDo(cmd.getArg1().trim());
             ui.showAdded(newToDo, taskManager);
             persist();
             return;
 
         case DEADLINE:
-            if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) {
+            if (cmd.getArg1() == null || cmd.getArg1().trim().isEmpty()) {
                 throw new EmptyTaskException("deadline");
             }
-            if (cmd.deadline == null) {
+            if (cmd.getDeadline() == null) {
                 throw new EmptyDeadlineTimeException();
             }
-            Deadline newDeadline = taskManager.addDeadline(cmd.arg1.trim(), cmd.deadline);
+            Deadline newDeadline = taskManager.addDeadline(cmd.getArg1().trim(), cmd.getDeadline());
             ui.showDeadline(newDeadline, taskManager);
             persist();
             return;
 
         case EVENT:
-            if (cmd.arg1 == null || cmd.arg1.trim().isEmpty()) {
+            if (cmd.getArg1() == null || cmd.getArg1().trim().isEmpty()) {
                 throw new EmptyTaskException("event");
             }
-            if (cmd.arg2 == null || cmd.arg2.trim().isEmpty()) {
+            if (cmd.getArg2() == null || cmd.getArg2().trim().isEmpty()) {
                 throw new EmptyEventTimeException();
             }
-            if (cmd.arg3 == null || cmd.arg3.trim().isEmpty()) {
+            if (cmd.getArg3() == null || cmd.getArg3().trim().isEmpty()) {
                 throw new EmptyEventTimeException();
             }
-            Events newEvent = taskManager.addEvents(cmd.arg1.trim(), cmd.arg2.trim(), cmd.arg3.trim());
+            Events newEvent = taskManager.addEvents(cmd.getArg1().trim(), cmd.getArg2().trim(), cmd.getArg3().trim());
             ui.showEvent(newEvent, taskManager);
             persist();
             return;
 
         default:
-            throw new InvalidCommandException(cmd.type.toString());
+            throw new InvalidCommandException(cmd.getType().toString());
         }
     }
 
