@@ -5,7 +5,7 @@ package bingy.exceptions;
  * or is otherwise invalid. This helps prevent operations such as mark,
  * unmark, or delete on non-existent tasks.
  */
-public class InvalidTaskIndexException extends IllegalArgumentException {
+public class InvalidTaskIndexException extends BingyException {
     /**
      * Constructs a new {@code InvalidTaskIndexException} with the specified
      * detail message indicating why the task index was invalid.

@@ -1,6 +1,11 @@
 package bingy.util;
 
+import bingy.commands.*;
+import bingy.exceptions.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Provides methods to parse both user commands and stored task lines.
@@ -9,6 +14,107 @@ import java.time.LocalDate;
  * for execution, and also to reconstruct tasks from their serialized form in storage.
  */
 public class Parser {
+    /**
+     * Parses a raw user input into a concrete {@link bingy.commands.Command}.
+     */
+    public static Command parse(String input) throws BingyException {
+        if (input == null || input.trim().isEmpty()) {
+            throw new InvalidCommandException("");
+        }
+        String trimmed = input.trim();
+        String lower = trimmed.toLowerCase();
+
+        // Single-word commands
+        if (lower.equals("list")) return new ListCommand();
+        if (lower.equals("bye") || lower.equals("exit")) return new ByeCommand();
+
+        String[] parts = trimmed.split(" ", 2);
+        String cmd = parts[0].toLowerCase();
+        String rest = parts.length > 1 ? parts[1].trim() : "";
+
+        switch (cmd) {
+            case "todo": {
+                // allow empty to trigger proper EmptyTaskException in TodoCommand
+                return new TodoCommand(rest);
+            }
+            case "deadline": {
+                if (rest.isEmpty()) {
+                    // no payload at all
+                    throw new EmptyTaskException("deadline");
+                }
+                String[] dlParts = rest.split(" /by ", 2);
+                String desc = dlParts[0].trim();
+                if (desc.isEmpty()) {
+                    throw new EmptyTaskException("deadline");
+                }
+                if (dlParts.length < 2 || dlParts[1].trim().isEmpty()) {
+                    // missing /by time
+                    throw new EmptyDeadlineTimeException();
+                }
+                LocalDate by;
+                try {
+                    by = LocalDate.parse(dlParts[1].trim()); // expect ISO yyyy-MM-dd
+                } catch (DateTimeParseException e) {
+                    throw new BingyException("Use ISO date for /by, e.g. 2025-09-12");
+                }
+                return new DeadlineCommand(desc, by);
+            }
+            case "event": {
+                if (rest.isEmpty()) {
+                    throw new EmptyTaskException("event");
+                }
+                int fromIdx = rest.indexOf(" /from ");
+                if (fromIdx == -1) {
+                    throw new EmptyEventTimeException();
+                }
+                String desc = rest.substring(0, fromIdx).trim();
+                String afterFrom = rest.substring(fromIdx + 7).trim();
+                int toIdx = afterFrom.indexOf(" /to ");
+                if (toIdx == -1) {
+                    throw new EmptyEventTimeException();
+                }
+                String fromStr = afterFrom.substring(0, toIdx).trim();
+                String toStr = afterFrom.substring(toIdx + 5).trim();
+                if (desc.isEmpty()) throw new EmptyTaskException("event");
+                if (fromStr.isEmpty() || toStr.isEmpty()) throw new EmptyEventTimeException();
+
+
+                return new EventCommand(desc, fromStr, toStr);
+            }
+            case "mark": {
+                int idx = parseIndexOrThrow(rest);
+                return new MarkCommand(idx);
+            }
+            case "unmark": {
+                int idx = parseIndexOrThrow(rest);
+                return new UnmarkCommand(idx);
+            }
+            case "delete": {
+                int idx = parseIndexOrThrow(rest);
+                return new DeleteCommand(idx);
+            }
+            case "find": {
+                if (rest.isEmpty()) {
+                    throw new EmptyKeywordException();
+                }
+                // If you have a FindCommand class, return it here. Otherwise, signal invalid for now.
+                throw new InvalidCommandException("find");
+            }
+            default:
+                throw new InvalidCommandException(cmd);
+        }
+    }
+
+    private static int parseIndexOrThrow(String rest) throws BingyException {
+        if (rest == null || rest.isBlank()) {
+            throw new InvalidTaskIndexException("Give me a task number, e.g., 2");
+        }
+        try {
+            return Integer.parseInt(rest.trim());
+        } catch (NumberFormatException e) {
+            throw new InvalidTaskIndexException("That’s not a number. Try something like: mark 2");
+        }
+    }
     /**
      * A structured representation of a parsed command.
      * <p>
@@ -198,43 +304,54 @@ public class Parser {
             if (parts.length < 2) {
                 return new ParsedCommand(ParsedCommand.Type.UNKNOWN);
             }
+
             String indexStr = parts[1].trim();
+
             return new ParsedCommand(
                     command.equals("mark") ? ParsedCommand.Type.MARK
                             : command.equals("unmark") ? ParsedCommand.Type.UNMARK
                                                        : ParsedCommand.Type.DELETE,
                     indexStr
             );
+
         case "todo":
+
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 return new ParsedCommand(ParsedCommand.Type.TODO, (String) null);
             }
+
             return new ParsedCommand(ParsedCommand.Type.TODO, parts[1].trim());
+
         case "find":
+
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 return new ParsedCommand(ParsedCommand.Type.FIND, (String) null);
             }
+
             return new ParsedCommand(ParsedCommand.Type.FIND, parts[1].trim());
+
         case "deadline":
+
             if (parts.length < 2) {
                 // no payload after "deadline"
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, null, (LocalDate) null);
             }
+
             String[] deadlineParts = parts[1].split(" /by ", 2);
             String descPart = deadlineParts[0].trim();
+
             if (descPart.isEmpty()) {
                 // missing description
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, null, (LocalDate) null);
             }
+
             if (deadlineParts.length < 2 || deadlineParts[1].trim().isEmpty()) {
-                // description present, but missing or empty /by portion
                 return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, (LocalDate) null);
             }
-            // description and /by present; try ISO parse (yyyy-MM-dd)
+
             LocalDate byDate = LocalDate.parse(deadlineParts[1].trim());
             return new ParsedCommand(ParsedCommand.Type.DEADLINE, descPart, byDate);
         case "event":
-            // Gracefully return EVENT with nulls so BingyBot can throw specific errors
             if (parts.length < 2) {
                 return new ParsedCommand(ParsedCommand.Type.EVENT, (String) null, (String) null, (String) null);
             }

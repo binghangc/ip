@@ -5,7 +5,7 @@ package bingy.exceptions;
  * by the application. This helps provide a clear error message to guide
  * the user toward valid commands.
  */
-public class InvalidCommandException extends IllegalArgumentException {
+public class InvalidCommandException extends BingyException {
 
     /**
      * Constructs a new {@code InvalidCommandException} with a message

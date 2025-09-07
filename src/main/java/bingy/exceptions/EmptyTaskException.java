@@ -5,7 +5,7 @@ package bingy.exceptions;
  * providing the required description. This prevents empty tasks
  * such as "todo", "deadline", or "event" without details.
  */
-public class EmptyTaskException extends IllegalArgumentException {
+public class EmptyTaskException extends BingyException {
     /**
      * Constructs a new {@code EmptyTaskException} with an error
      * message that indicates the type of task cannot be empty.

@@ -76,7 +76,7 @@ public class TaskManager {
      * @param end the end time of the event.
      * @return the {@link bingy.tasks.Events} that was created and added.
      */
-    public Events addEvents(String description, String start, String end) {
+    public Events addEvent(String description, String start, String end) {
         Events task = new Events(description, start, end);
         tasks.add(task);
         return task;

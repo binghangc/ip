@@ -33,12 +33,14 @@ public class Ui {
     /**
      * Prints the ASCII logo and a greeting banner when the application starts.
      */
-    public void greet() {
-        System.out.println(LOGO);
-        System.out.println(LINE);
-        System.out.println(" Boo! I'm Bingy");
-        System.out.println(" WHAT caan't I doooOoo for yoou?");
-        System.out.println(LINE);
+    public String greet() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LOGO).append("\n")
+          .append(LINE).append("\n")
+          .append(" Boo! I'm Bingy\n")
+          .append(" WHAT caan't I doooOoo for yoou?\n")
+          .append(LINE);
+        return sb.toString();
     }
 
     /**
@@ -46,17 +48,23 @@ public class Ui {
      *
      * @param message the text to display to the user.
      */
-    public void sendMessage(String message) {
-        System.out.println(LINE);
-        System.out.println(message);
-        System.out.println(LINE);
+    public String sendMessage(String message) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LINE).append("\n")
+          .append(message).append("\n")
+          .append(LINE);
+        return sb.toString();
     }
 
     /**
      * Prints a farewell banner when the application exits.
      */
-    public void sayGoodbye() {
-        System.out.println(LINE + "\n bbbbYEE. hope to scareee you again soooooOOon! \n" + LINE);
+    public String sayGoodbye() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LINE)
+          .append("\n bbbbYEE. hope to scareee you again soooooOOon! \n")
+          .append(LINE);
+        return sb.toString();
     }
 
 
@@ -65,14 +73,15 @@ public class Ui {
      *
      * @param tasks list of matching {@link bingy.tasks.Task}.
      */
-    public void showMatches(List<Task> tasks) {
-        System.out.println(LINE);
-        System.out.println("Here are the matches:");
-
+    public String showMatches(List<Task> tasks) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LINE).append("\n");
+        sb.append("Here are the matches:\n");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
+            sb.append(String.format("%d. %s%n", i + 1, tasks.get(i)));
         }
-        System.out.println(LINE);
+        sb.append(LINE);
+        return sb.toString();
     }
 
     /**
@@ -80,13 +89,15 @@ public class Ui {
      *
      * @param tasks the list of {@link bingy.tasks.Task} to display.
      */
-    public void showTasks(List<Task> tasks) {
-        System.out.println(LINE);
-        System.out.println("Here's the list of chores you will NOT complete MUAHAHAH");
+    public String showTasks(List<Task> tasks) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LINE).append("\n");
+        sb.append("Here's the list of chores you will NOT complete MUAHAHAH\n");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(String.format("%d. %s", i + 1, tasks.get(i).toString()));
+            sb.append(String.format("%d. %s%n", i + 1, tasks.get(i)));
         }
-        System.out.println(LINE);
+        sb.append(LINE);
+        return sb.toString();
     }
 
     /**
@@ -96,10 +107,10 @@ public class Ui {
      * @param task  the {@link bingy.tasks.ToDo} that was added.
      * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
-    public void showAdded(ToDo task, TaskManager tasks) {
+    public String showAdded(ToDo task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
         String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
-        sendMessage(String.format("Added this task:\n  %s\n%s", task, status));
+        return sendMessage(String.format("Added this task:\n  %s\n%s", task, status));
     }
 
     /**
@@ -109,10 +120,10 @@ public class Ui {
      * @param task  the {@link bingy.tasks.Deadline} that was added.
      * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
-    public void showDeadline(Deadline task, TaskManager tasks) {
+    public String showDeadline(Deadline task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
         String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
-        sendMessage(String.format("Time is tickin'!\n  %s\n%s", task, status));
+        return sendMessage(String.format("Time is tickin'!\n  %s\n%s", task, status));
     }
 
     /**
@@ -122,9 +133,22 @@ public class Ui {
      * @param task  the {@link bingy.tasks.Events} task that was added.
      * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
      */
-    public void showEvent(Events task, TaskManager tasks) {
+    public String showEvent(Events task, TaskManager tasks) {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
         String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
-        sendMessage(String.format("Eventing!\n   %s\n%s", task, status));
+        return sendMessage(String.format("Eventing!\n   %s\n%s", task, status));
+    }
+
+    /**
+     * Displays a confirmation after deleting a {@link bingy.tasks.Task},
+     * along with the updated task count from the {@link bingy.util.TaskManager}.
+     *
+     * @param task  the {@link bingy.tasks.Task} that was deleted.
+     * @param tasks the current {@link bingy.util.TaskManager} used to compute task count.
+     */
+    public String showDelete(Task task, TaskManager tasks) {
+        String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
+        String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
+        return sendMessage(String.format("Noted. I've removed this task:\n  %s\n%s", task, status));
     }
 }

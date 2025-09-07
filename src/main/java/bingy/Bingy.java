@@ -5,12 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import bingy.exceptions.EmptyDeadlineTimeException;
-import bingy.exceptions.EmptyEventTimeException;
-import bingy.exceptions.EmptyKeywordException;
-import bingy.exceptions.EmptyTaskException;
-import bingy.exceptions.InvalidCommandException;
-import bingy.exceptions.InvalidTaskIndexException;
+import bingy.exceptions.*;
 import bingy.tasks.Deadline;
 import bingy.tasks.Events;
 import bingy.tasks.Task;
@@ -20,6 +15,7 @@ import bingy.util.Parser.ParsedCommand;
 import bingy.util.Storage;
 import bingy.util.TaskManager;
 import bingy.util.Ui;
+import bingy.commands.Command;
 
 /**
  * Represents the main entry point for the Bingy chatbot application.
@@ -30,6 +26,7 @@ public class Bingy {
     private static final Storage storage = new Storage("tasks.txt");
     private final Ui ui = new Ui();
     private boolean running = true;
+    private String commandType = "UNKNOWN";
 
 
     /**
@@ -38,21 +35,18 @@ public class Bingy {
      * until the user exits.
      */
     public void run() {
-        ui.greet();
+        System.out.println(ui.greet());
         try {
             ArrayList<Task> loaded = storage.load();
             taskManager.addAll(loaded);
         } catch (IOException e) {
-            ui.sendMessage("Starting fresh (no saved tasks found).");
+            System.out.println(ui.sendMessage("Starting fresh (no saved tasks found)."));
         }
         Scanner sc = new Scanner(System.in);
         while (running) {
-            try {
-                String input = sc.nextLine();
-                handleInput(input);
-            } catch (Exception e) {
-                ui.sendMessage(e.getMessage());
-            }
+            String input = sc.nextLine();
+            String response = getResponse(input);
+            System.out.println(response);
         }
         sc.close();
     }
@@ -65,16 +59,18 @@ public class Bingy {
      * @throws EmptyTaskException if the command is missing a required task description.
      *
      */
-    private void handleInput(String input) throws EmptyTaskException {
+    private void handleInput(String input) throws BingyException {
         String trimmed = input.trim();
 
         ParsedCommand cmd = Parser.parseUserCommand(input);
+        this.commandType = cmd.getType().name();
 
         if (cmd.getType() == ParsedCommand.Type.UNKNOWN) {
             // Preserve the user's command word for a clearer error message
             String cmdWord = (cmd.getArg1() != null && !cmd.getArg1().isBlank())
                     ? cmd.getArg1()
                     : (trimmed.isEmpty() ? "" : trimmed.split("\\s+", 2)[0]);
+            this.commandType = "UNKNOWN";
             throw new InvalidCommandException(cmdWord);
         }
 
@@ -168,7 +164,7 @@ public class Bingy {
             if (cmd.getArg3() == null || cmd.getArg3().trim().isEmpty()) {
                 throw new EmptyEventTimeException();
             }
-            Events newEvent = taskManager.addEvents(cmd.getArg1().trim(), cmd.getArg2().trim(), cmd.getArg3().trim());
+            Events newEvent = taskManager.addEvent(cmd.getArg1().trim(), cmd.getArg2().trim(), cmd.getArg3().trim());
             ui.showEvent(newEvent, taskManager);
             persist();
             return;
@@ -195,6 +191,34 @@ public class Bingy {
         } catch (IOException e) {
             ui.sendMessage("Failed to save tasks: " + e.getMessage());
         }
+    }
+
+    /**
+     * Generates a response for the user's chat message.
+     */
+    public String getResponse(String input) {
+        try {
+            Command c = Parser.parse(input);
+            this.commandType = c.getClass().getSimpleName();
+            String out = c.execute(taskManager, storage, ui);
+
+            if (c.isExit()) {
+                this.running = false;
+            }
+
+            return out;
+        } catch (BingyException e) {
+            return ui.sendMessage(e.getMessage());
+        } catch (Exception e) {
+            return ui.sendMessage(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns the type of the last successfully parsed command as a String.
+     */
+    public String getCommandType() {
+        return this.commandType;
     }
 
     public static void main(String[] args) {

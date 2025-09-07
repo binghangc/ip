@@ -5,7 +5,7 @@ package bingy.exceptions;
  * This ensures that users provide both the /from and /to parameters
  * when creating an event.
  */
-public class EmptyEventTimeException extends IllegalArgumentException {
+public class EmptyEventTimeException extends BingyException {
 
     /**
      * Constructs a new {@code EmptyEventTimeException} with a default
