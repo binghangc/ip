@@ -38,6 +38,9 @@ public class Bingy {
         System.out.println(ui.greet());
         try {
             ArrayList<Task> loaded = storage.load();
+
+            assert loaded != null : "Storage.load() should never return null";
+
             taskManager.addAll(loaded);
         } catch (IOException e) {
             System.out.println(ui.sendMessage("Starting fresh (no saved tasks found)."));
@@ -63,7 +66,11 @@ public class Bingy {
         String trimmed = input.trim();
 
         ParsedCommand cmd = Parser.parseUserCommand(input);
+
+        assert cmd != null : "Parser should never return null command";
+
         this.commandType = cmd.getType().name();
+
 
         if (cmd.getType() == ParsedCommand.Type.UNKNOWN) {
             // Preserve the user's command word for a clearer error message
@@ -112,6 +119,8 @@ public class Bingy {
                                 taskIndex + 1, taskList.size())
                 );
             }
+
+            assert taskIndex >= 0 && taskIndex < taskList.size() : "Index must be in range before get()";
 
             Task t = taskList.get(taskIndex);
             if (cmd.getType() == ParsedCommand.Type.MARK) {
@@ -218,6 +227,7 @@ public class Bingy {
      * Returns the type of the last successfully parsed command as a String.
      */
     public String getCommandType() {
+
         return this.commandType;
     }
 
