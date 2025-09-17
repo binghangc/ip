@@ -31,7 +31,7 @@ public class Bingy {
     private static final TaskManager taskManager = new TaskManager(DEFAULT_CAPACITY);
     private static final Storage storage = new Storage(DEFAULT_STORAGE_FILE);
     private final Ui ui = new Ui();
-    private boolean running = true;
+    private boolean isRunning = true;
     private String commandType = "UNKNOWN";
 
 
@@ -52,7 +52,7 @@ public class Bingy {
             System.out.println(ui.sendMessage("Starting fresh (no saved tasks found)."));
         }
         Scanner sc = new Scanner(System.in);
-        while (running) {
+        while (isRunning) {
             String input = sc.nextLine();
             String response = getResponse(input);
             System.out.println(response);
@@ -91,7 +91,7 @@ public class Bingy {
         switch (cmd.getType()) {
         case BYE:
             sayGoodbye();
-            running = false;
+            isRunning = false;
             return;
 
         case LIST:
@@ -218,7 +218,7 @@ public class Bingy {
             String out = c.execute(taskManager, storage, ui);
 
             if (c.isExit()) {
-                this.running = false;
+                this.isRunning = false;
             }
 
             return out;
