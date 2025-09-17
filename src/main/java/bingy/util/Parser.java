@@ -33,75 +33,75 @@ public class Parser {
         String rest = parts.length > 1 ? parts[1].trim() : "";
 
         switch (cmd) {
-            case "todo": {
-                // allow empty to trigger proper EmptyTaskException in TodoCommand
-                return new TodoCommand(rest);
+        case "todo": {
+            // allow empty to trigger proper EmptyTaskException in TodoCommand
+            return new TodoCommand(rest);
+        }
+        case "deadline": {
+            if (rest.isEmpty()) {
+                // no payload at all
+                throw new EmptyTaskException("deadline");
             }
-            case "deadline": {
-                if (rest.isEmpty()) {
-                    // no payload at all
-                    throw new EmptyTaskException("deadline");
-                }
-                String[] dlParts = rest.split(" /by ", 2);
-                String desc = dlParts[0].trim();
-                if (desc.isEmpty()) {
-                    throw new EmptyTaskException("deadline");
-                }
-                if (dlParts.length < 2 || dlParts[1].trim().isEmpty()) {
-                    // missing /by time
-                    throw new EmptyDeadlineTimeException();
-                }
-                LocalDate by;
-                try {
-                    by = LocalDate.parse(dlParts[1].trim()); // expect ISO yyyy-MM-dd
-                } catch (DateTimeParseException e) {
-                    throw new BingyException("Use ISO date for /by, e.g. 2025-09-12");
-                }
-                return new DeadlineCommand(desc, by);
+            String[] dlParts = rest.split(" /by ", 2);
+            String desc = dlParts[0].trim();
+            if (desc.isEmpty()) {
+                throw new EmptyTaskException("deadline");
             }
-            case "event": {
-                if (rest.isEmpty()) {
-                    throw new EmptyTaskException("event");
-                }
-                int fromIdx = rest.indexOf(" /from ");
-                if (fromIdx == -1) {
-                    throw new EmptyEventTimeException();
-                }
-                String desc = rest.substring(0, fromIdx).trim();
-                String afterFrom = rest.substring(fromIdx + 7).trim();
-                int toIdx = afterFrom.indexOf(" /to ");
-                if (toIdx == -1) {
-                    throw new EmptyEventTimeException();
-                }
-                String fromStr = afterFrom.substring(0, toIdx).trim();
-                String toStr = afterFrom.substring(toIdx + 5).trim();
-                if (desc.isEmpty()) throw new EmptyTaskException("event");
-                if (fromStr.isEmpty() || toStr.isEmpty()) throw new EmptyEventTimeException();
+            if (dlParts.length < 2 || dlParts[1].trim().isEmpty()) {
+                // missing /by time
+                throw new EmptyDeadlineTimeException();
+            }
+            LocalDate by;
+            try {
+                by = LocalDate.parse(dlParts[1].trim()); // expect ISO yyyy-MM-dd
+            } catch (DateTimeParseException e) {
+                throw new BingyException("Use ISO date for /by, e.g. 2025-09-12");
+            }
+            return new DeadlineCommand(desc, by);
+        }
+        case "event": {
+            if (rest.isEmpty()) {
+                throw new EmptyTaskException("event");
+            }
+            int fromIdx = rest.indexOf(" /from ");
+            if (fromIdx == -1) {
+                throw new EmptyEventTimeException();
+            }
+            String desc = rest.substring(0, fromIdx).trim();
+            String afterFrom = rest.substring(fromIdx + 7).trim();
+            int toIdx = afterFrom.indexOf(" /to ");
+            if (toIdx == -1) {
+                throw new EmptyEventTimeException();
+            }
+            String fromStr = afterFrom.substring(0, toIdx).trim();
+            String toStr = afterFrom.substring(toIdx + 5).trim();
+            if (desc.isEmpty()) throw new EmptyTaskException("event");
+            if (fromStr.isEmpty() || toStr.isEmpty()) throw new EmptyEventTimeException();
 
 
-                return new EventCommand(desc, fromStr, toStr);
+            return new EventCommand(desc, fromStr, toStr);
+        }
+        case "mark": {
+            int idx = parseIndexOrThrow(rest);
+            return new MarkCommand(idx);
+        }
+        case "unmark": {
+            int idx = parseIndexOrThrow(rest);
+            return new UnmarkCommand(idx);
+        }
+        case "delete": {
+            int idx = parseIndexOrThrow(rest);
+            return new DeleteCommand(idx);
+        }
+        case "find": {
+            if (rest.isEmpty()) {
+                throw new EmptyKeywordException();
             }
-            case "mark": {
-                int idx = parseIndexOrThrow(rest);
-                return new MarkCommand(idx);
-            }
-            case "unmark": {
-                int idx = parseIndexOrThrow(rest);
-                return new UnmarkCommand(idx);
-            }
-            case "delete": {
-                int idx = parseIndexOrThrow(rest);
-                return new DeleteCommand(idx);
-            }
-            case "find": {
-                if (rest.isEmpty()) {
-                    throw new EmptyKeywordException();
-                }
-                // If you have a FindCommand class, return it here. Otherwise, signal invalid for now.
-                throw new InvalidCommandException("find");
-            }
-            default:
-                throw new InvalidCommandException(cmd);
+            // If you have a FindCommand class, return it here. Otherwise, signal invalid for now.
+            throw new InvalidCommandException("find");
+        }
+        default:
+            throw new InvalidCommandException(cmd);
         }
     }
 
