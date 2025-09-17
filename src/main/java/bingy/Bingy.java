@@ -22,8 +22,14 @@ import bingy.commands.Command;
  * It coordinates user input, parsing, task management, and UI.
  */
 public class Bingy {
-    private static TaskManager taskManager = new TaskManager(100);
-    private static final Storage storage = new Storage("tasks.txt");
+    /** Default maximum number of tasks the TaskManager can hold. */
+    private static final int DEFAULT_CAPACITY = 100;
+
+    /** Default storage file used to persist tasks. */
+    private static final String DEFAULT_STORAGE_FILE = "tasks.txt";
+
+    private static final TaskManager taskManager = new TaskManager(DEFAULT_CAPACITY);
+    private static final Storage storage = new Storage(DEFAULT_STORAGE_FILE);
     private final Ui ui = new Ui();
     private boolean running = true;
     private String commandType = "UNKNOWN";
