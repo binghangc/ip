@@ -1,6 +1,7 @@
 package bingy.util;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +77,7 @@ public class TaskManager {
      * @param end the end time of the event.
      * @return the {@link bingy.tasks.Events} that was created and added.
      */
-    public Events addEvent(String description, String start, String end) {
+    public Events addEvent(String description, LocalDateTime start, LocalDateTime end) {
         Events task = new Events(description, start, end);
         tasks.add(task);
         return task;

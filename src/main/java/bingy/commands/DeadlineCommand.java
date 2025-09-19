@@ -21,6 +21,15 @@ public class DeadlineCommand implements Command {
         this.byTime = byTime;
     }
 
+    public LocalDate getDeadline() {
+        return this.byTime;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.DEADLINE;
+    }
+
     @Override
     public String execute(TaskManager tasks, Storage storage, Ui ui) throws BingyException {
         if (this.description == null || this.description.isBlank()) {

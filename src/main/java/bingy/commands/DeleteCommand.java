@@ -1,20 +1,34 @@
 package bingy.commands;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import bingy.exceptions.BingyException;
 import bingy.exceptions.InvalidTaskIndexException;
 import bingy.tasks.Task;
 import bingy.util.Storage;
 import bingy.util.TaskManager;
 import bingy.util.Ui;
-import java.io.IOException;
-import java.util.ArrayList;
 
+/**
+ * Represents a command to delete a task from the task list.
+ * It handles the deletion of the task at the specified index,
+ * updates the storage, and provides feedback via the UI.
+ */
 public class DeleteCommand implements Command {
     private final int index;
+
 
     public DeleteCommand(int oneBasedIndex) {
         this.index = oneBasedIndex - 1;
     }
+
+
+    @Override
+    public Type getType() {
+        return Type.DELETE;
+    }
+
 
     @Override
     public String execute(TaskManager tasks, Storage storage, Ui ui) throws BingyException {

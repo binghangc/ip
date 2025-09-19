@@ -1,5 +1,8 @@
 package bingy.tasks;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Represents an event task with a description, start time, and end time.
  * <p>
@@ -7,9 +10,9 @@ package bingy.tasks;
  * that includes two string fields to represent the start and end times.
  * </p>
  */
-public class Events extends Task {
-    private final String start;
-    private final String end;
+public class Events extends TimedTask {
+    private LocalDateTime start;
+    private LocalDateTime end;
 
     /**
      * Creates a new {@link Events} task with the given description, start, and end times.
@@ -18,10 +21,16 @@ public class Events extends Task {
      * @param start the start time of the event.
      * @param end the end time of the event.
      */
-    public Events(String description, String start, String end) {
+    public Events(String description, LocalDateTime start, LocalDateTime end) {
         super(description);
         this.start = start;
         this.end = end;
+    }
+
+    @Override
+    protected String formatWith(DateTimeFormatter formatter) {
+        return String.format("[%s][%s] %s (from: %s, to: %s)", typeTag(), getStatusIcon(),
+                getDescription(), start.format(formatter), end.format(formatter));
     }
 
     @Override
@@ -29,10 +38,5 @@ public class Events extends Task {
         return "E";
     }
 
-    @Override
-    public String toString() {
-        return String.format("[%s][%s] %s (from: %s, to: %s)", typeTag(), getStatusIcon(),
-                getDescription(), this.start, this.end);
-    }
 
 }

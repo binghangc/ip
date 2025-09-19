@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,15 +38,17 @@ public class TaskManagerTest {
     }
 
     @Test
-    void addEvents_storesEventWithCorrectFields() {
+    void addEvent_storesEventWithCorrectFields() {
         TaskManager manager = new TaskManager(10);
-        Events e = manager.addEvents("party", "2pm", "5pm");
+        LocalDateTime start = LocalDateTime.of(2025, 1, 1, 14, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 1, 1, 17, 0);
+        Events e = manager.addEvent("party", start, end);
 
         assertEquals(1, manager.getSize());
         assertInstanceOf(Events.class, manager.getTasks().get(0));
         assertTrue(e.toString().contains("party"));
-        assertTrue(e.toString().contains("2pm"));
-        assertTrue(e.toString().contains("5pm"));
+        assertTrue(e.toString().contains(start.toString()));
+        assertTrue(e.toString().contains(end.toString()));
     }
 
     @Test

@@ -62,7 +62,7 @@ public class Ui {
     public String sayGoodbye() {
         StringBuilder sb = new StringBuilder();
         sb.append(LINE)
-          .append("\n bbbbYEE. hope to scareee you again soooooOOon! \n")
+          .append("\nBye bye! \n")
           .append(LINE);
         return sb.toString();
     }

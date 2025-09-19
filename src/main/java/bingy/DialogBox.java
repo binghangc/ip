@@ -15,6 +15,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
 
+
+/**
+ * DialogBox is a custom control representing a dialog box consisting of a text label and an image.
+ * It is used to display user and application (e.g., Duke) messages in a conversational UI.
+ * The control supports flipping its content to distinguish between user and application messages,
+ * and allows for different dialog styles based on command types.
+ */
 public class DialogBox extends HBox {
 
     @FXML
@@ -22,6 +29,14 @@ public class DialogBox extends HBox {
     @FXML
     private ImageView displayPicture;
 
+    /**
+     * Creates a DialogBox containing the specified text and image.
+     * Loads the associated FXML layout and sets this instance as its controller and root.
+     * Initializes the dialog label with the provided text and the display picture with the provided image.
+     *
+     * @param text the text to display in the dialog box
+     * @param img the image to display alongside the text
+     */
     public DialogBox(String text, Image img) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("/view/DialogBox.fxml"));

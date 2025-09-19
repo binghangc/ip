@@ -10,11 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import bingy.tasks.Deadline;
-import bingy.tasks.Events;
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
-
+import bingy.tasks.*;
 
 /**
  * Handles persistence of tasks to and from the {@code data/} directory.
@@ -57,8 +53,8 @@ public class Storage {
         FileWriter fw = new FileWriter(file);
         try {
             for (Task t : list) {
-                if (t instanceof Deadline) {
-                    fw.write(((Deadline) t).toStorageString());
+                if (t instanceof TimedTask) {
+                    fw.write(((TimedTask) t).toStorageString());
                 } else {
                     fw.write(t.toString());
 
@@ -90,25 +86,10 @@ public class Storage {
              BufferedReader br = new BufferedReader(fr)) {
             String line;
             while ((line = br.readLine()) != null) {
-                Parser.ParsedCommand cmd = Parser.parseStorageLine(line);
-                Task task;
-                switch (cmd.getType()) {
-                case TODO:
-                    task = new ToDo(cmd.getArg1());
-                    break;
-                case DEADLINE:
-                    task = new Deadline(cmd.getArg1(), cmd.getDeadline());
-                    break;
-                case EVENT:
-                    task = new Events(cmd.getArg1(), cmd.getArg2(), cmd.getArg3());
-                    break;
-                default:
-                    continue;
+                Task task = Parser.parseStorageLine(line);
+                if (task != null) {
+                    tasks.add(task);
                 }
-                if (cmd.isDone()) {
-                    task.markDone();
-                }
-                tasks.add(task);
             }
         }
 

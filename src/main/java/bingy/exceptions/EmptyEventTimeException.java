@@ -12,7 +12,8 @@ public class EmptyEventTimeException extends BingyException {
      * error message guiding the user to provide both start and end times.
      */
     public EmptyEventTimeException() {
-        super("Please add start and end time for your event\n Example: \"event project meeting /from Mon 2pm /to 4pm\""
+        super("Please add start and end time for your event\n"
+                + " Example: \"event project meeting /from YYYY-MM_ddTHH:mm /to 4pm\""
         );
     }
 
