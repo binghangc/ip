@@ -46,9 +46,11 @@ public class TaskManagerTest {
 
         assertEquals(1, manager.getSize());
         assertInstanceOf(Events.class, manager.getTasks().get(0));
-        assertTrue(e.toString().contains("party"));
-        assertTrue(e.toString().contains(start.toString()));
-        assertTrue(e.toString().contains(end.toString()));
+
+        // Verify description and times directly
+        assertEquals("party", e.getDescription());
+        assertEquals(start, e.getStart());
+        assertEquals(end, e.getEnd());
     }
 
     @Test
