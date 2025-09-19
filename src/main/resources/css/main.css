@@ -45,3 +45,10 @@
     -fx-opacity: 0;
 }
 
+.root {
+    main-color: rgb(237, 255, 242);
+    -fx-background-color: main-color;
+    -fx-background-image: url("../images/background.jpg");
+    -fx-background-size: 400px 600px;
+    -fx-background-repeat: round;
+}
