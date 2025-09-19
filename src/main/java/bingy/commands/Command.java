@@ -57,6 +57,10 @@ public interface Command {
          * Represents a command to exit the application.
          */
         BYE,
+        /**
+         * Represents a command to view schedule
+         */
+        VIEW,
     }
 
     /**

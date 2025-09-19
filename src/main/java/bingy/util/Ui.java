@@ -1,5 +1,7 @@
 package bingy.util;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import bingy.tasks.Deadline;
@@ -63,7 +65,7 @@ public class Ui {
         StringBuilder sb = new StringBuilder();
         sb.append(LINE)
           .append("\nBye bye! \n")
-          .append(LINE);
+            .append(LINE);
         return sb.toString();
     }
 
@@ -150,5 +152,28 @@ public class Ui {
         String taskWord = (tasks.getSize() == 1) ? "task" : "tasks";
         String status = String.format("Now you have %d %s in the list", tasks.getSize(), taskWord);
         return sendMessage(String.format("Noted. I've removed this task:\n  %s\n%s", task, status));
+    }
+    /**
+     * Displays a daily schedule view of timed tasks (Deadlines and Events) for a given date.
+     *
+     * @param tasks the list of timed tasks to display
+     * @param date  the date for which the schedule is being shown
+     * @return formatted string representation of the schedule
+     */
+    public String showSchedule(List<? extends Task> tasks, LocalDate date) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LINE).append("\n");
+        sb.append("Schedule for ").append(date.format(DateTimeFormatter.ofPattern("EEE, MMM d yyyy"))).append(":\n");
+
+        if (tasks.isEmpty()) {
+            sb.append("  (No events or deadlines)\n");
+        } else {
+            for (Task t : tasks) {
+                sb.append("  ").append(t).append("\n");
+            }
+        }
+
+        sb.append(LINE);
+        return sb.toString();
     }
 }

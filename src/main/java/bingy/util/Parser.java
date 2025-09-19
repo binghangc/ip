@@ -1,14 +1,31 @@
 package bingy.util;
 
-import bingy.commands.*;
-import bingy.exceptions.*;
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
-import bingy.tasks.Deadline;
-import bingy.tasks.Events;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+
+import bingy.commands.ByeCommand;
+import bingy.commands.Command;
+import bingy.commands.DeadlineCommand;
+import bingy.commands.DeleteCommand;
+import bingy.commands.EventCommand;
+import bingy.commands.ListCommand;
+import bingy.commands.MarkCommand;
+import bingy.commands.TodoCommand;
+import bingy.commands.UnmarkCommand;
+import bingy.commands.ViewCommand;
+import bingy.exceptions.BingyException;
+import bingy.exceptions.EmptyDeadlineTimeException;
+import bingy.exceptions.EmptyEventTimeException;
+import bingy.exceptions.EmptyKeywordException;
+import bingy.exceptions.EmptyTaskException;
+import bingy.exceptions.InvalidCommandException;
+import bingy.exceptions.InvalidTaskIndexException;
+import bingy.tasks.Deadline;
+import bingy.tasks.Events;
+import bingy.tasks.Task;
+import bingy.tasks.ToDo;
+
 
 /**
  * Provides methods to parse both user commands and stored task lines.
@@ -28,8 +45,12 @@ public class Parser {
         String lower = trimmed.toLowerCase();
 
         // Single-word commands
-        if (lower.equals("list")) return new ListCommand();
-        if (lower.equals("bye") || lower.equals("exit")) return new ByeCommand();
+        if (lower.equals("list")) {
+            return new ListCommand();
+        }
+        if (lower.equals("bye") || lower.equals("exit")) {
+            return new ByeCommand();
+        }
 
         String[] parts = trimmed.split(" ", 2);
         String cmd = parts[0].toLowerCase();
@@ -118,6 +139,19 @@ public class Parser {
             }
             // If you have a FindCommand class, return it here. Otherwise, signal invalid for now.
             throw new InvalidCommandException("find");
+        }
+        case "view": {
+            LocalDate date;
+            if (rest.isEmpty()) {
+                date = LocalDate.now();
+            } else {
+                try {
+                    date = LocalDate.parse(rest);
+                } catch (DateTimeParseException e) {
+                    throw new BingyException("Use ISO date for view, e.g. view 2025-09-20");
+                }
+            }
+            return new ViewCommand(date);
         }
         default:
             throw new InvalidCommandException(cmd);
@@ -209,8 +243,21 @@ public class Parser {
                 return null;
             }
 
-            LocalDateTime start = LocalDateTime.parse(startStr);
-            LocalDateTime end = LocalDateTime.parse(endStr);
+            LocalDateTime start;
+            try {
+                start = LocalDateTime.parse(startStr);
+            } catch (DateTimeParseException ex) {
+                // Fallback: allow date-only and default to start of day
+                start = LocalDate.parse(startStr).atStartOfDay();
+            }
+
+            LocalDateTime end;
+            try {
+                end = LocalDateTime.parse(endStr);
+            } catch (DateTimeParseException ex) {
+                // Fallback: allow date-only and default to end of day
+                end = LocalDate.parse(endStr).atTime(23, 59);
+            }
             task = new Events(desc, start, end);
             break;
         }

@@ -1,5 +1,6 @@
 package bingy.tasks;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -27,6 +28,14 @@ public class Events extends TimedTask {
         this.end = end;
     }
 
+    public LocalDateTime getStart() {
+        return start;
+    }
+
+    public LocalDateTime getEnd() {
+        return end;
+    }
+
     @Override
     protected String formatWith(DateTimeFormatter formatter) {
         return String.format("[%s][%s] %s (from: %s, to: %s)", typeTag(), getStatusIcon(),
@@ -38,5 +47,16 @@ public class Events extends TimedTask {
         return "E";
     }
 
+    @Override
+    public boolean occursOn(LocalDate date) {
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = date.atTime(23, 59, 59, 999_999_999);
+        return !end.isBefore(dayStart) && !start.isAfter(dayEnd);
+    }
+
+    @Override
+    public LocalDateTime getScheduleTime(LocalDate date) {
+        return start;
+    }
 
 }

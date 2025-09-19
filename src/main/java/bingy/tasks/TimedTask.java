@@ -2,6 +2,8 @@
 
 package bingy.tasks;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -23,7 +25,8 @@ public abstract class TimedTask extends Task {
     /**
      * Formatter for storing the date in ISO-8601 format (e.g., "2023-01-01").
      */
-    protected static final DateTimeFormatter STORAGE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    protected static final DateTimeFormatter STORAGE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    protected static final DateTimeFormatter STORAGE_DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     /**
      * Constructs a TimedTask with the given description.
@@ -54,6 +57,10 @@ public abstract class TimedTask extends Task {
     public String toStorageString() {
         return formatWith(STORAGE_FORMATTER);
     }
+
+    public abstract boolean occursOn(LocalDate date);
+
+    public abstract LocalDateTime getScheduleTime(LocalDate date);
 
     @Override
     public String toString() {

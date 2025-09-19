@@ -1,6 +1,8 @@
 package bingy.tasks;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -42,5 +44,20 @@ public class Deadline extends TimedTask {
     @Override
     public String toString() {
         return formatWith(DATE_ONLY_FORMATTER);
+    }
+
+    @Override
+    public boolean occursOn(LocalDate date) {
+        return deadline.equals(date);
+    }
+
+    @Override
+    public String toStorageString() {
+        return formatWith(STORAGE_DATE_FORMATTER);
+    }
+
+    @Override
+    public LocalDateTime getScheduleTime(LocalDate date) {
+        return LocalDateTime.of(deadline, LocalTime.of(23, 59));
     }
 }

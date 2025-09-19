@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import bingy.tasks.Deadline;
-import bingy.tasks.Events;
-import bingy.tasks.Task;
-import bingy.tasks.ToDo;
+import bingy.tasks.*;
 
 
 /**
@@ -128,5 +125,33 @@ public class TaskManager {
         if (items != null) {
             tasks.addAll(items);
         }
+    }
+
+    public List<TimedTask> getScheduleFor(LocalDate date) {
+        if (date == null) {
+            return Collections.emptyList();
+        }
+
+        List<TimedTask> result = new ArrayList<>();
+        for (Task t : this.tasks) {
+            if (t instanceof TimedTask timed && timed.occursOn(date)) {
+                result.add(timed);
+            }
+        }
+
+        // Sort by each item's representative schedule time, then by description for stability
+        result.sort((a, b) -> {
+            var ta = a.getScheduleTime(date);
+            var tb = b.getScheduleTime(date);
+            int cmp = ta.compareTo(tb);
+            if (cmp != 0) {
+                return cmp;
+            }
+            String da = a.getDescription() == null ? "" : a.getDescription();
+            String db = b.getDescription() == null ? "" : b.getDescription();
+            return da.compareToIgnoreCase(db);
+        });
+
+        return result;
     }
 }
