@@ -103,15 +103,15 @@ view YYYY-MM-DD
 ---
 ## Command Summary
 
-| Action          | Format / Example                                    |
-|-----------------|-----------------------------------------------------|
-| **Add ToDo**    | `todo DESCRIPTION` <br> e.g., `todo buy groceries` |
-| **Add Deadline**| `deadline DESCRIPTION /by YYYY-MM-DD` <br> e.g., `deadline submit report /by 2025-09-25` |
-| **Add Event**   | `event DESCRIPTION /from YYYY-MM-DD HH:mm /to YYYY-MM-DD HH:mm` <br> e.g., `event meeting /from 2025-09-25 14:00 /to 2025-09-25 15:00` |
-| **List**        | `list` |
-| **Delete**      | `delete TASK_NUMBER` <br> e.g., `delete 2` |
-| **Find**        | `find KEYWORD` <br> e.g., `find groceries` |
-| **Mark**        | `mark TASK_NUMBER` <br> e.g., `mark 1` |
-| **Unmark**      | `unmark TASK_NUMBER` <br> e.g., `unmark 1` |
+| Action            | Format / Example                                    |
+|-------------------|-----------------------------------------------------|
+| **Add ToDo**      | `todo DESCRIPTION` <br> e.g., `todo buy groceries` |
+| **Add Deadline**  | `deadline DESCRIPTION /by YYYY-MM-DD` <br> e.g., `deadline submit report /by 2025-09-25` |
+| **Add Event**     | `event DESCRIPTION /from YYYY-MM-DD HH:mm /to YYYY-MM-DD HH:mm` <br> e.g., `event meeting /from 2025-09-25 14:00 /to 2025-09-25 15:00` |
+| **List**          | `list` |
+| **Delete**        | `delete TASK_NUMBER` <br> e.g., `delete 2` |
+| **Find**          | `find KEYWORD` <br> e.g., `find groceries` |
+| **Mark**          | `mark TASK_NUMBER` <br> e.g., `mark 1` |
+| **Unmark**        | `unmark TASK_NUMBER` <br> e.g., `unmark 1` |
 | **View Schedule** | `view YYYY-MM-DD` <br> e.g., `view 2025-09-25` |
-| **Exit**        | `bye` |
+| **Say Goodbye**   | `bye` |

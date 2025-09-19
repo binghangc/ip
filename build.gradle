@@ -33,11 +33,11 @@ test {
 }
 
 application {
-    mainClass.set("bingy.Launcher")
+    mainClass.set("mario.Launcher")
 }
 
 shadowJar {
-    archiveBaseName.set("bingy")
+    archiveBaseName.set("mario")
     archiveClassifier = null
 }
 
